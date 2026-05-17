@@ -1,0 +1,1715 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>魏晋南北朝重要人物活跃时期对比</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: "Microsoft YaHei", "PingFang SC", "Noto Sans SC", sans-serif;
+    background: #1a1a2e; color: #e0e0e0; min-height: 100vh;
+    overflow-x: hidden;
+  }
+  .container { max-width: 100%; padding: 20px; position: relative; }
+  h1 {
+    text-align: center; font-size: 28px; font-weight: 700;
+    background: linear-gradient(135deg, #f9a825, #e65100, #d32f2f, #7b1fa2, #1565c0);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    background-clip: text; margin-bottom: 8px; letter-spacing: 4px;
+  }
+  .subtitle { text-align: center; font-size: 13px; color: #888; margin-bottom: 16px; }
+
+  .legend {
+    display: flex; flex-wrap: wrap; justify-content: center; gap: 8px 16px;
+    margin-bottom: 16px; font-size: 13px;
+  }
+  .legend-item { display: flex; align-items: center; gap: 5px; cursor: pointer; transition: opacity 0.2s; }
+  .legend-item:hover { opacity: 0.7; }
+  .legend-dot { width: 12px; height: 12px; border-radius: 2px; }
+
+  .chart-wrapper {
+    position: relative; overflow: auto; border: 1px solid #333;
+    border-radius: 8px; background: #12121f;
+    max-height: 72vh; max-width: 100%;
+  }
+  .chart-wrapper::-webkit-scrollbar { width: 8px; height: 8px; }
+  .chart-wrapper::-webkit-scrollbar-track { background: #1a1a2e; border-radius: 4px; }
+  .chart-wrapper::-webkit-scrollbar-thumb { background: #444; border-radius: 4px; }
+  .chart-wrapper::-webkit-scrollbar-corner { background: #1a1a2e; }
+
+  svg { display: block; }
+
+  .bar-rect { transition: filter 0.15s, opacity 0.15s; cursor: pointer; }
+  .bar-rect:hover { filter: brightness(1.5); }
+  .bar-rect.selected { filter: brightness(1.8) drop-shadow(0 0 6px currentColor); }
+
+  .tooltip {
+    position: fixed; pointer-events: none; opacity: 0;
+    background: rgba(20,20,40,0.95); border: 1px solid #555;
+    border-radius: 6px; padding: 10px 14px; font-size: 13px;
+    line-height: 1.7; z-index: 100; white-space: nowrap;
+    transition: opacity 0.12s; box-shadow: 0 4px 16px rgba(0,0,0,0.5);
+  }
+  .tooltip.show { opacity: 1; }
+  .tooltip .tname { font-size: 16px; font-weight: 700; color: #fff; }
+  .tooltip .tyears { color: #aaa; font-size: 12px; margin-left: 6px; }
+  .tooltip .tdetail { color: #ccc; font-size: 12px; }
+
+  .event-line { pointer-events: none; }
+  .event-label { font-size: 10px; fill: #666; pointer-events: none; }
+  .era-band { opacity: 0.06; pointer-events: none; }
+  .era-label-text { font-size: 11px; fill: #555; font-weight: 600; pointer-events: none; }
+
+  /* ── MODAL OVERLAY ── */
+  .modal-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.75);
+    z-index: 200; display: flex; align-items: center; justify-content: center;
+    opacity: 0; pointer-events: none; transition: opacity 0.3s;
+  }
+  .modal-overlay.active { opacity: 1; pointer-events: auto; }
+
+  .modal-card {
+    background: linear-gradient(135deg, #1a1a30 0%, #12121f 100%);
+    border: 1px solid #444; border-radius: 16px;
+    width: 680px; max-width: 95vw; max-height: 88vh;
+    overflow-y: auto; overflow-x: hidden;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.7);
+    position: relative; padding: 0;
+  }
+  .modal-card::-webkit-scrollbar { width: 6px; }
+  .modal-card::-webkit-scrollbar-track { background: transparent; }
+  .modal-card::-webkit-scrollbar-thumb { background: #444; border-radius: 3px; }
+
+  .modal-close {
+    position: sticky; top: 12px; float: right; z-index: 10;
+    width: 36px; height: 36px; border-radius: 50%;
+    border: 1px solid #555; background: rgba(0,0,0,0.6);
+    color: #ccc; font-size: 20px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    margin-right: 12px; transition: all 0.2s;
+  }
+  .modal-close:hover { background: #c0392b; border-color: #c0392b; color: #fff; }
+
+  .modal-header {
+    display: flex; gap: 20px; padding: 24px 24px 16px;
+    border-bottom: 1px solid #2a2a40;
+  }
+  .portrait-frame {
+    flex-shrink: 0; width: 120px; height: 160px;
+    border-radius: 8px; overflow: hidden;
+    border: 2px solid #444;
+    background: #1a1a28;
+  }
+  .portrait-frame svg { width: 100%; height: 100%; display: block; }
+
+  .modal-title-area { flex: 1; display: flex; flex-direction: column; justify-content: center; }
+  .modal-name { font-size: 26px; font-weight: 700; letter-spacing: 2px; }
+  .modal-years { font-size: 14px; color: #999; margin-top: 2px; }
+  .modal-role { font-size: 14px; color: #ccc; margin-top: 4px; }
+  .modal-era-badge {
+    display: inline-block; margin-top: 8px; padding: 3px 12px;
+    border-radius: 12px; font-size: 12px; font-weight: 600;
+    align-self: flex-start;
+  }
+  .modal-bio {
+    padding: 6px 24px; font-size: 14px; line-height: 1.8;
+    color: #bbb; border-bottom: 1px solid #2a2a40;
+    text-indent: 2em;
+  }
+  .modal-events {
+    padding: 16px 24px 24px;
+  }
+  .modal-events h3 {
+    font-size: 15px; color: #ddd; margin-bottom: 12px;
+    padding-left: 10px; border-left: 3px solid currentColor;
+  }
+  .event-timeline { position: relative; padding-left: 20px; }
+  .event-timeline::before {
+    content: ''; position: absolute; left: 6px; top: 4px; bottom: 4px;
+    width: 2px; background: #333; border-radius: 1px;
+  }
+  .event-item {
+    position: relative; margin-bottom: 10px; font-size: 13px;
+    padding-left: 16px; line-height: 1.6;
+  }
+  .event-item::before {
+    content: ''; position: absolute; left: -16px; top: 7px;
+    width: 8px; height: 8px; border-radius: 50%;
+    border: 2px solid #888; background: #1a1a30;
+  }
+  .event-year { color: #f9a825; font-weight: 600; margin-right: 6px; font-size: 12px; }
+  .event-text { color: #bbb; }
+
+  /* hint bar at bottom */
+  .hint-bar {
+    text-align: center; padding: 8px; font-size: 12px; color: #666;
+    margin-top: -8px;
+  }
+  .hint-bar span { color: #f9a825; }
+
+  /* ── MINI MAP ── */
+  .mini-map-panel {
+    position: fixed; top: 16px; right: 16px;
+    width: 262px; background: rgba(18,18,31,0.92);
+    border: 1px solid #333; border-radius: 10px;
+    padding: 10px 12px; z-index: 50;
+    backdrop-filter: blur(6px);
+  }
+  .mini-map-title {
+    font-size: 12px; font-weight: 600; color: #888;
+    text-align: center; margin-bottom: 4px;
+  }
+  .mini-map-panel svg { width: 100%; height: auto; display: block; }
+  .map-region {
+    cursor: pointer; transition: all 0.3s;
+  }
+  .map-region:hover { filter: brightness(1.5); }
+  .map-label { font-size: 10px; fill: #777; pointer-events: none; text-anchor: middle; }
+  .map-label.highlight { fill: #fff; font-weight: 600; }
+  .mini-map-fig {
+    font-size: 11px; color: #666; text-align: center; margin-top: 4px;
+    transition: color 0.3s;
+  }
+  .mini-map-fig.active { color: #f9a825; }
+
+  @media (max-width: 700px) {
+    .modal-header { flex-direction: column; align-items: center; text-align: center; }
+    .modal-era-badge { align-self: center; }
+  }
+
+  /* ── SEARCH & FILTER ── */
+  .search-bar { display: flex; flex-direction: column; align-items: center; gap: 8px; margin-bottom: 12px; }
+  .search-bar input {
+    width: 100%; max-width: 360px; padding: 8px 14px;
+    border-radius: 20px; border: 1px solid #444; outline: none;
+    background: #12121f; color: #ddd; font-size: 14px;
+    transition: border-color 0.2s;
+  }
+  .search-bar input:focus { border-color: #f9a825; }
+  .search-bar input::placeholder { color: #666; }
+  .filter-tags { display: flex; gap: 5px; flex-wrap: wrap; justify-content: center; }
+  .filter-tag {
+    padding: 3px 10px; border-radius: 12px; font-size: 12px; cursor: pointer;
+    border: 1px solid transparent; transition: all 0.2s; user-select: none;
+  }
+  .filter-tag:hover { filter: brightness(1.3); }
+  .filter-tag.inactive { opacity: 0.3; filter: grayscale(0.7); }
+
+  /* ── COMPARE MODAL ── */
+  .compare-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.78);
+    z-index: 210; display: flex; align-items: center; justify-content: center;
+    opacity: 0; pointer-events: none; transition: opacity 0.3s;
+  }
+  .compare-overlay.active { opacity: 1; pointer-events: auto; }
+  .compare-card {
+    background: linear-gradient(135deg, #1a1a30 0%, #12121f 100%);
+    border: 1px solid #444; border-radius: 16px;
+    width: 900px; max-width: 96vw; max-height: 88vh;
+    overflow-y: auto; overflow-x: hidden;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.7);
+    position: relative; padding: 20px 24px;
+  }
+  .compare-card::-webkit-scrollbar { width: 6px; }
+  .compare-card::-webkit-scrollbar-track { background: transparent; }
+  .compare-card::-webkit-scrollbar-thumb { background: #444; border-radius: 3px; }
+  .compare-close {
+    position: sticky; top: 0; float: right; z-index: 10;
+    width: 36px; height: 36px; border-radius: 50%;
+    border: 1px solid #555; background: rgba(0,0,0,0.6);
+    color: #ccc; font-size: 20px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.2s;
+  }
+  .compare-close:hover { background: #c0392b; border-color: #c0392b; color: #fff; }
+  .compare-cols { display: flex; gap: 20px; }
+  .compare-col { flex: 1; min-width: 0; }
+  .compare-divider { width: 1px; background: #333; flex-shrink: 0; }
+  .compare-col-header { text-align: center; margin-bottom: 12px; }
+  .compare-col-header .cname { font-size: 22px; font-weight: 700; letter-spacing: 2px; }
+  .compare-col-header .cyears { font-size: 13px; color: #999; }
+  .compare-col-header .crole { font-size: 13px; color: #ccc; }
+  .compare-portrait { width: 120px; height: 160px; margin: 0 auto 10px; border-radius: 8px; overflow: hidden; border: 2px solid #444; }
+  .compare-portrait img { width: 100%; height: 100%; display: block; }
+  .compare-bio { font-size: 13px; line-height: 1.7; color: #bbb; margin-bottom: 12px; text-indent: 2em; }
+  .compare-events { }
+  .compare-events h4 { font-size: 13px; color: #ddd; margin-bottom: 8px; padding-left: 8px; border-left: 3px solid currentColor; }
+  .compare-event-item { font-size: 12px; margin-bottom: 6px; padding-left: 12px; position: relative; line-height: 1.5; }
+  .compare-event-item::before { content: ''; position: absolute; left: 0; top: 6px; width: 6px; height: 6px; border-radius: 50%; border: 1px solid #666; }
+  .compare-event-year { color: #f9a825; font-weight: 600; margin-right: 4px; font-size: 11px; }
+  .compare-event-text { color: #aaa; }
+  .overlap-badge {
+    display: inline-block; padding: 2px 10px; border-radius: 10px;
+    font-size: 11px; background: rgba(249,168,37,0.2); color: #f9a825;
+    margin-top: 6px;
+  }
+  .compare-hint {
+    text-align: center; margin-top: 14px; font-size: 12px; color: #555;
+  }
+  .compare-hint span { color: #f9a825; }
+
+  @media (max-width: 700px) {
+    .compare-cols { flex-direction: column; }
+    .compare-divider { width: 100%; height: 1px; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>魏晋南北朝重要人物活跃时期对比</h1>
+  <p class="subtitle">公元 150 年 — 610 年 · 涵盖三国至隋初 50 位历史人物 · 悬停看简介 · 点击看生平</p>
+  <div class="search-bar">
+    <input type="text" id="searchInput" placeholder="🔍 搜索人物姓名..." autocomplete="off" />
+    <div class="filter-tags" id="filterTags"></div>
+  </div>
+  <div class="legend" id="legend"></div>
+  <div class="chart-wrapper" id="chartWrapper">
+    <div class="chart-inner"><svg id="chart"></svg></div>
+  </div>
+  <div class="hint-bar">💡 <span>点击</span>色条查看古风漫画画像 · <span>再点第二人</span>进入对比模式 · <span>Ctrl+图例</span>筛选阵营 · 搜索框过滤姓名</div>
+  <div class="mini-map-panel" id="miniMapPanel">
+    <div class="mini-map-title">势力区域</div>
+    <svg id="miniMap" viewBox="0 0 260 210" xmlns="http://www.w3.org/2000/svg"></svg>
+    <div class="mini-map-fig" id="miniMapFig">点击人物查看区域</div>
+  </div>
+</div>
+<div class="tooltip" id="tooltip"></div>
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal-card" id="modalCard"></div>
+</div>
+<div class="compare-overlay" id="compareOverlay">
+  <div class="compare-card" id="compareCard"></div>
+</div>
+
+<script>
+(function() {
+  // ═══════════════════════════════════════════════════════════════
+  // PORTRAIT SVG GENERATORS — AI-styled traditional Chinese portraits
+  // ═══════════════════════════════════════════════════════════════
+  // ═══════════════════════════════════════════════════════════════
+  // PORTRAIT CANVAS SYSTEM — ancient Chinese manga style (古风漫画)
+  // ═══════════════════════════════════════════════════════════════
+  const PW = 240, PH = 320;
+
+  function drawMangaEye(ctx, cx, cy, w, h, irisColor) {
+    ctx.save();
+    // Eye white
+    ctx.beginPath();
+    ctx.ellipse(cx, cy, w/2, h/2, 0, 0, Math.PI * 2);
+    ctx.fillStyle = '#fefefe';
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(40,20,10,0.12)';
+    ctx.lineWidth = 0.6;
+    ctx.stroke();
+    // Upper shadow gradient
+    const sg = ctx.createLinearGradient(cx, cy-h/2, cx, cy+h/2);
+    sg.addColorStop(0, 'rgba(0,0,0,0.10)');
+    sg.addColorStop(0.5, 'rgba(0,0,0,0)');
+    sg.addColorStop(1, 'rgba(0,0,0,0.03)');
+    ctx.beginPath();
+    ctx.ellipse(cx, cy, w/2, h/2, 0, 0, Math.PI * 2);
+    ctx.fillStyle = sg;
+    ctx.fill();
+    // Iris
+    const ig = ctx.createRadialGradient(cx-w*0.08, cy-h*0.10, w*0.04, cx, cy, w*0.32);
+    ig.addColorStop(0, irisColor);
+    ig.addColorStop(0.7, '#120600');
+    ig.addColorStop(1, '#060200');
+    ctx.beginPath();
+    ctx.ellipse(cx, cy+0.5, w*0.36, h*0.42, 0, 0, Math.PI * 2);
+    ctx.fillStyle = ig;
+    ctx.fill();
+    // Pupil
+    ctx.beginPath();
+    ctx.ellipse(cx, cy+0.5, w*0.17, h*0.26, 0, 0, Math.PI * 2);
+    ctx.fillStyle = '#030100';
+    ctx.fill();
+    // Main catchlight (large, upper-left)
+    ctx.beginPath();
+    ctx.ellipse(cx-w*0.10, cy-h*0.13, w*0.12, h*0.16, -0.3, 0, Math.PI * 2);
+    ctx.fillStyle = 'rgba(255,255,255,0.92)';
+    ctx.fill();
+    // Secondary catchlight (small, lower-right)
+    ctx.beginPath();
+    ctx.arc(cx+w*0.06, cy+h*0.06, w*0.05, 0, Math.PI * 2);
+    ctx.fillStyle = 'rgba(255,255,255,0.65)';
+    ctx.fill();
+    // Tiny catchlight
+    ctx.beginPath();
+    ctx.arc(cx-w*0.14, cy-h*0.18, w*0.025, 0, Math.PI * 2);
+    ctx.fillStyle = 'rgba(255,255,255,0.45)';
+    ctx.fill();
+    // Upper lash line (thick, characteristic manga line)
+    ctx.beginPath();
+    ctx.moveTo(cx-w/2-1.5, cy-0.5);
+    ctx.quadraticCurveTo(cx-w*0.05, cy-h/2-3, cx+w/2+1.5, cy-0.5);
+    ctx.strokeStyle = '#140804';
+    ctx.lineWidth = 2.6;
+    ctx.lineCap = 'round';
+    ctx.stroke();
+    // Outer corner wing
+    ctx.beginPath();
+    ctx.moveTo(cx+w/2-1, cy-0.5);
+    ctx.quadraticCurveTo(cx+w/2+2.5, cy-2, cx+w/2+4.5, cy+1.5);
+    ctx.strokeStyle = '#140804';
+    ctx.lineWidth = 1.8;
+    ctx.lineCap = 'round';
+    ctx.stroke();
+    // Lower lash line (subtle)
+    ctx.beginPath();
+    ctx.moveTo(cx-w/2+1, cy+2);
+    ctx.quadraticCurveTo(cx, cy+h/2-0.5, cx+w/2-1, cy+2);
+    ctx.strokeStyle = 'rgba(30,10,5,0.30)';
+    ctx.lineWidth = 0.7;
+    ctx.stroke();
+    // Eyelid crease
+    ctx.beginPath();
+    ctx.moveTo(cx-w/2-1, cy-h/2-1);
+    ctx.quadraticCurveTo(cx, cy-h/2-8, cx+w/2+1, cy-h/2-1);
+    ctx.strokeStyle = 'rgba(30,10,5,0.10)';
+    ctx.lineWidth = 0.5;
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  function drawMangaFace(ctx, cx, cy, opts) {
+    const { irises, brows, nose, mouth, blush } = opts;
+    ctx.save();
+    // Face shadow
+    ctx.beginPath();
+    ctx.ellipse(cx+1, cy+1, 35, 41, 0, 0, Math.PI * 2);
+    ctx.fillStyle = 'rgba(0,0,0,0.06)';
+    ctx.fill();
+    // Face base with warm skin gradient
+    const skinGrad = ctx.createRadialGradient(cx-2, cy-12, 5, cx, cy+10, 42);
+    skinGrad.addColorStop(0, '#fef7ed');
+    skinGrad.addColorStop(0.45, '#f2e0c2');
+    skinGrad.addColorStop(0.8, '#e6cca2');
+    skinGrad.addColorStop(1, '#c8a878');
+    ctx.beginPath();
+    ctx.ellipse(cx, cy, 35, 41, 0, 0, Math.PI * 2);
+    ctx.fillStyle = skinGrad;
+    ctx.fill();
+    // Face outline
+    ctx.strokeStyle = '#b89468';
+    ctx.lineWidth = 1.2;
+    ctx.stroke();
+    // Blush
+    blush.forEach(b => {
+      const bg = ctx.createRadialGradient(b.x, b.y, 2, b.x, b.y, b.r);
+      bg.addColorStop(0, 'rgba(255,175,165,0.42)');
+      bg.addColorStop(0.6, 'rgba(255,155,145,0.18)');
+      bg.addColorStop(1, 'rgba(255,145,135,0)');
+      ctx.beginPath();
+      ctx.ellipse(b.x, b.y, b.r, b.r*0.6, 0, 0, Math.PI * 2);
+      ctx.fillStyle = bg;
+      ctx.fill();
+    });
+    // Eyes
+    irises.forEach(eye => { drawMangaEye(ctx, eye.x, eye.y, eye.w, eye.h, eye.color); });
+    // Eyebrows
+    brows.forEach(b => {
+      ctx.beginPath();
+      ctx.moveTo(b.x1, b.y1);
+      ctx.quadraticCurveTo(b.xc, b.yc, b.x2, b.y2);
+      ctx.strokeStyle = b.color || '#1a0a04';
+      ctx.lineWidth = b.width || 2;
+      ctx.lineCap = 'round';
+      ctx.stroke();
+    });
+    // Nose
+    if (nose) {
+      ctx.beginPath();
+      ctx.moveTo(nose.x, nose.y-3);
+      ctx.quadraticCurveTo(nose.x+1, nose.y, nose.x-1, nose.y+1);
+      ctx.strokeStyle = '#c4a078';
+      ctx.lineWidth = 0.8;
+      ctx.lineCap = 'round';
+      ctx.stroke();
+      // Nostril shadows
+      ctx.beginPath();
+      ctx.ellipse(nose.x-3, nose.y+2.5, 1.8, 1.2, 0.1, 0, Math.PI*2);
+      ctx.fillStyle = 'rgba(160,120,80,0.13)';
+      ctx.fill();
+      ctx.beginPath();
+      ctx.ellipse(nose.x+3, nose.y+2.5, 1.8, 1.2, -0.1, 0, Math.PI*2);
+      ctx.fillStyle = 'rgba(160,120,80,0.13)';
+      ctx.fill();
+    }
+    // Nose bridge highlight
+    ctx.beginPath();
+    ctx.moveTo(cx, cy-15);
+    ctx.quadraticCurveTo(cx-1, cy-5, cx, cy+1);
+    ctx.strokeStyle = 'rgba(255,250,240,0.18)';
+    ctx.lineWidth = 3;
+    ctx.lineCap = 'round';
+    ctx.stroke();
+    // Mouth
+    if (mouth) {
+      ctx.beginPath();
+      ctx.moveTo(mouth.x1, mouth.my);
+      ctx.quadraticCurveTo((mouth.x1+mouth.x2)/2, mouth.my+mouth.arc, mouth.x2, mouth.my);
+      ctx.strokeStyle = '#b08060';
+      ctx.lineWidth = 1.3;
+      ctx.lineCap = 'round';
+      ctx.stroke();
+      // Lower lip highlight
+      ctx.beginPath();
+      ctx.moveTo(mouth.x1+2, mouth.my+0.5);
+      ctx.quadraticCurveTo((mouth.x1+mouth.x2)/2, mouth.my+mouth.arc+1.5, mouth.x2-2, mouth.my+0.5);
+      ctx.strokeStyle = 'rgba(180,120,80,0.25)';
+      ctx.lineWidth = 0.7;
+      ctx.lineCap = 'round';
+      ctx.stroke();
+    }
+    ctx.restore();
+  }
+
+  function drawMangaHair(ctx, cx, cy, hairColor, style) {
+    ctx.save();
+    // Back hair mass
+    ctx.beginPath();
+    ctx.ellipse(cx, cy-4, 38, 48, 0, 0, Math.PI * 2);
+    const hg = ctx.createLinearGradient(cx, cy-50, cx, cy+40);
+    hg.addColorStop(0, '#0a0603');
+    hg.addColorStop(0.5, hairColor || '#180e06');
+    hg.addColorStop(1, '#0a0402');
+    ctx.fillStyle = hg;
+    ctx.fill();
+    // Front hair shape
+    ctx.beginPath();
+    ctx.moveTo(cx-37, cy-5);
+    ctx.quadraticCurveTo(cx-38, cy-20, cx-20, cy-43);
+    ctx.quadraticCurveTo(cx, cy-47, cx+20, cy-43);
+    ctx.quadraticCurveTo(cx+38, cy-20, cx+37, cy-5);
+    ctx.quadraticCurveTo(cx+36, cy+10, cx+28, cy+20);
+    ctx.quadraticCurveTo(cx+20, cy+14, cx, cy+15);
+    ctx.quadraticCurveTo(cx-20, cy+14, cx-28, cy+20);
+    ctx.quadraticCurveTo(cx-36, cy+10, cx-37, cy-5);
+    ctx.closePath();
+    const hg2 = ctx.createLinearGradient(cx, cy-47, cx, cy+20);
+    hg2.addColorStop(0, '#060302');
+    hg2.addColorStop(0.35, hairColor || '#180e06');
+    hg2.addColorStop(1, '#0a0402');
+    ctx.fillStyle = hg2;
+    ctx.fill();
+    // Hair strand lines
+    ctx.save();
+    ctx.beginPath();
+    ctx.moveTo(cx-37, cy-5);
+    ctx.quadraticCurveTo(cx-38, cy-20, cx-20, cy-43);
+    ctx.quadraticCurveTo(cx, cy-47, cx+20, cy-43);
+    ctx.quadraticCurveTo(cx+38, cy-20, cx+37, cy-5);
+    ctx.quadraticCurveTo(cx+36, cy+10, cx+28, cy+20);
+    ctx.quadraticCurveTo(cx+20, cy+14, cx, cy+15);
+    ctx.quadraticCurveTo(cx-20, cy+14, cx-28, cy+20);
+    ctx.quadraticCurveTo(cx-36, cy+10, cx-37, cy-5);
+    ctx.clip();
+    for (let i = -6; i <= 6; i++) {
+      const sx = cx + i * 5.5;
+      ctx.beginPath();
+      ctx.moveTo(sx, cy-48);
+      ctx.quadraticCurveTo(sx+i*1.5, cy-10, sx+i*2.5, cy+22);
+      ctx.strokeStyle = 'rgba(0,0,0,0.18)';
+      ctx.lineWidth = 0.6;
+      ctx.stroke();
+    }
+    ctx.restore();
+    // Hair highlight band
+    ctx.beginPath();
+    ctx.moveTo(cx-22, cy-35);
+    ctx.quadraticCurveTo(cx, cy-39, cx+22, cy-35);
+    ctx.quadraticCurveTo(cx+18, cy-28, cx, cy-30);
+    ctx.quadraticCurveTo(cx-18, cy-28, cx-22, cy-35);
+    ctx.closePath();
+    ctx.fillStyle = 'rgba(255,255,255,0.05)';
+    ctx.fill();
+    // Side locks
+    if (style !== 'none') {
+      ctx.beginPath();
+      ctx.moveTo(cx-28, cy+10);
+      ctx.quadraticCurveTo(cx-36, cy+32, cx-30, cy+52);
+      ctx.quadraticCurveTo(cx-25, cy+36, cx-24, cy+14);
+      ctx.fillStyle = hairColor || '#180e06';
+      ctx.fill();
+      ctx.beginPath();
+      ctx.moveTo(cx+28, cy+10);
+      ctx.quadraticCurveTo(cx+36, cy+32, cx+30, cy+52);
+      ctx.quadraticCurveTo(cx+25, cy+36, cx+24, cy+14);
+      ctx.fillStyle = hairColor || '#180e06';
+      ctx.fill();
+    }
+    ctx.restore();
+  }
+
+  // --- Imperial Ruler Costume ---
+  function drawRulerCostume(ctx, color) {
+    ctx.save();
+    // Outer robe
+    ctx.beginPath();
+    ctx.moveTo(28, 310); ctx.lineTo(28, 134);
+    ctx.quadraticCurveTo(28, 120, 36, 119);
+    ctx.lineTo(36, 132);
+    ctx.quadraticCurveTo(20, 122, 16, 110);
+    ctx.lineTo(224, 110);
+    ctx.quadraticCurveTo(220, 122, 204, 132);
+    ctx.lineTo(204, 119);
+    ctx.quadraticCurveTo(212, 120, 212, 134);
+    ctx.lineTo(212, 310); ctx.closePath();
+    const rg = ctx.createLinearGradient(120, 110, 120, 310);
+    rg.addColorStop(0, '#1a1410'); rg.addColorStop(0.5, '#241c14'); rg.addColorStop(1, '#0e0a06');
+    ctx.fillStyle = rg; ctx.fill();
+    // Cross collar
+    ctx.beginPath(); ctx.moveTo(120, 128); ctx.lineTo(78, 195); ctx.lineTo(44, 310);
+    ctx.strokeStyle = color; ctx.lineWidth = 2.2; ctx.globalAlpha = 0.6; ctx.stroke(); ctx.globalAlpha = 1;
+    ctx.beginPath(); ctx.moveTo(120, 128); ctx.lineTo(162, 195); ctx.lineTo(196, 310);
+    ctx.strokeStyle = 'rgba(255,255,255,0.08)'; ctx.lineWidth = 1.2; ctx.stroke();
+    // Inner collar
+    ctx.beginPath(); ctx.moveTo(108, 128); ctx.lineTo(68, 195);
+    ctx.strokeStyle = 'rgba(200,180,140,0.12)'; ctx.lineWidth = 0.6; ctx.stroke();
+    // Belt
+    ctx.fillStyle = '#4a1020'; ctx.fillRect(36, 175, 168, 12);
+    ctx.strokeStyle = color; ctx.lineWidth = 1.2; ctx.globalAlpha = 0.5; ctx.strokeRect(36, 175, 168, 12); ctx.globalAlpha = 1;
+    ctx.fillStyle = color; ctx.globalAlpha = 0.4; ctx.fillRect(105, 172, 30, 18); ctx.globalAlpha = 1;
+    ctx.fillStyle = '#1a3a1a'; ctx.globalAlpha = 0.35; ctx.fillRect(109, 174, 22, 14); ctx.globalAlpha = 1;
+    // Sleeve draping
+    ctx.beginPath(); ctx.moveTo(28, 138); ctx.quadraticCurveTo(10, 168, 12, 205);
+    ctx.strokeStyle = color; ctx.lineWidth = 1.4; ctx.globalAlpha = 0.25; ctx.stroke(); ctx.globalAlpha = 1;
+    ctx.beginPath(); ctx.moveTo(212, 138); ctx.quadraticCurveTo(230, 168, 228, 205);
+    ctx.strokeStyle = color; ctx.lineWidth = 1.4; ctx.globalAlpha = 0.25; ctx.stroke(); ctx.globalAlpha = 1;
+    // Robe cloud motifs
+    ctx.beginPath(); ctx.ellipse(78, 240, 8, 5, 0, 0, Math.PI*2);
+    ctx.strokeStyle = color; ctx.lineWidth = 0.5; ctx.globalAlpha = 0.18; ctx.stroke(); ctx.globalAlpha = 1;
+    ctx.beginPath(); ctx.ellipse(162, 248, 9, 5.5, 0, 0, Math.PI*2);
+    ctx.strokeStyle = color; ctx.lineWidth = 0.5; ctx.globalAlpha = 0.18; ctx.stroke(); ctx.globalAlpha = 1;
+    // Hands holding jade tablet
+    ctx.fillStyle = '#e8d4b4'; ctx.beginPath(); ctx.ellipse(78, 163, 12, 8, 0, 0, Math.PI*2); ctx.fill();
+    ctx.strokeStyle = '#c4a078'; ctx.lineWidth = 0.8; ctx.stroke();
+    ctx.beginPath(); ctx.ellipse(162, 163, 12, 8, 0, 0, Math.PI*2); ctx.fill(); ctx.stroke();
+    ctx.fillStyle = '#f5f0e0'; ctx.fillRect(108, 133, 6, 48);
+    ctx.strokeStyle = '#c8b878'; ctx.lineWidth = 0.8; ctx.strokeRect(108, 133, 6, 48);
+    // Crown
+    ctx.fillStyle = '#0a0808'; ctx.fillRect(78, 18, 84, 18);
+    ctx.strokeStyle = color; ctx.lineWidth = 1.5; ctx.globalAlpha = 0.6; ctx.strokeRect(78, 18, 84, 18); ctx.globalAlpha = 1;
+    ctx.fillStyle = color; ctx.globalAlpha = 0.4; ctx.fillRect(72, 12, 96, 8); ctx.globalAlpha = 1;
+    // Tassels
+    for (let tx of [82, 98, 142, 158]) {
+      ctx.beginPath(); ctx.moveTo(tx, 36); ctx.lineTo(tx-4, 55);
+      ctx.strokeStyle = color; ctx.lineWidth = 0.7; ctx.globalAlpha = 0.45; ctx.stroke(); ctx.globalAlpha = 1;
+      ctx.beginPath(); ctx.arc(tx-2, 42, 1.8, 0, Math.PI*2); ctx.fillStyle = '#ffd700'; ctx.globalAlpha = 0.45; ctx.fill(); ctx.globalAlpha = 1;
+      ctx.beginPath(); ctx.arc(tx-3, 49, 1.8, 0, Math.PI*2); ctx.fillStyle = '#ff6666'; ctx.globalAlpha = 0.45; ctx.fill(); ctx.globalAlpha = 1;
+    }
+    ctx.restore();
+  }
+
+  // --- General/Warrior Costume ---
+  function drawGeneralCostume(ctx, color) {
+    ctx.save();
+    // Red cape
+    ctx.beginPath();
+    ctx.moveTo(14, 135); ctx.quadraticCurveTo(-2, 180, 2, 290); ctx.lineTo(26, 290); ctx.lineTo(28, 160); ctx.closePath();
+    const cg1 = ctx.createLinearGradient(10, 160, 10, 290);
+    cg1.addColorStop(0, '#c0392b'); cg1.addColorStop(1, '#6b1010');
+    ctx.fillStyle = cg1; ctx.globalAlpha = 0.55; ctx.fill(); ctx.globalAlpha = 1;
+    ctx.beginPath();
+    ctx.moveTo(226, 135); ctx.quadraticCurveTo(242, 180, 238, 290); ctx.lineTo(214, 290); ctx.lineTo(212, 160); ctx.closePath();
+    ctx.fillStyle = cg1; ctx.globalAlpha = 0.55; ctx.fill(); ctx.globalAlpha = 1;
+    // Armor body
+    ctx.beginPath();
+    ctx.moveTo(30, 310); ctx.lineTo(30, 134); ctx.quadraticCurveTo(30, 120, 38, 119);
+    ctx.lineTo(38, 132); ctx.quadraticCurveTo(22, 122, 18, 110); ctx.lineTo(222, 110);
+    ctx.quadraticCurveTo(218, 122, 202, 132); ctx.lineTo(202, 119);
+    ctx.quadraticCurveTo(210, 120, 210, 134); ctx.lineTo(210, 310); ctx.closePath();
+    const ag = ctx.createLinearGradient(120, 110, 120, 310);
+    ag.addColorStop(0, '#3d3b3b'); ag.addColorStop(0.3, '#2c2a2a'); ag.addColorStop(1, '#161616');
+    ctx.fillStyle = ag; ctx.fill();
+    // Lamellar plates pattern
+    ctx.globalAlpha = 0.12;
+    for (let row = 0; row < 10; row++) {
+      const ry = 140 + row * 16;
+      ctx.beginPath();
+      for (let col = 0; col < 7; col++) {
+        const cx = 46 + col * 22;
+        ctx.moveTo(cx-8, ry); ctx.lineTo(cx, ry-6); ctx.lineTo(cx+8, ry); ctx.lineTo(cx, ry+6); ctx.closePath();
+      }
+      ctx.fillStyle = row % 2 === 0 ? '#888' : '#666';
+      ctx.fill();
+      ctx.strokeStyle = '#444'; ctx.lineWidth = 0.3; ctx.stroke();
+    }
+    ctx.globalAlpha = 1;
+    // Chest mirror
+    ctx.beginPath(); ctx.ellipse(120, 176, 22, 28, 0, 0, Math.PI*2);
+    const mg = ctx.createRadialGradient(120, 168, 4, 120, 176, 26);
+    mg.addColorStop(0, '#6a6a6a'); mg.addColorStop(0.7, '#484848'); mg.addColorStop(1, '#222');
+    ctx.fillStyle = mg; ctx.fill();
+    ctx.strokeStyle = '#8a8a8a'; ctx.lineWidth = 1.5; ctx.stroke();
+    ctx.beginPath(); ctx.ellipse(120, 176, 16, 22, 0, 0, Math.PI*2);
+    ctx.strokeStyle = '#999'; ctx.lineWidth = 0.6; ctx.globalAlpha = 0.4; ctx.stroke(); ctx.globalAlpha = 1;
+    // Shoulder guards
+    ctx.beginPath(); ctx.ellipse(42, 136, 20, 14, -0.3, 0, Math.PI*2);
+    ctx.fillStyle = '#353535'; ctx.fill(); ctx.strokeStyle = '#7a7a7a'; ctx.lineWidth = 1; ctx.stroke();
+    ctx.beginPath(); ctx.ellipse(198, 136, 20, 14, 0.3, 0, Math.PI*2);
+    ctx.fillStyle = '#353535'; ctx.fill(); ctx.strokeStyle = '#7a7a7a'; ctx.lineWidth = 1; ctx.stroke();
+    // Belt
+    ctx.fillStyle = '#1a1a1a'; ctx.fillRect(34, 210, 172, 10);
+    ctx.strokeStyle = '#888'; ctx.lineWidth = 1; ctx.strokeRect(34, 210, 172, 10);
+    ctx.fillStyle = color; ctx.fillRect(108, 207, 24, 16);
+    // Helmet
+    ctx.beginPath();
+    ctx.moveTo(72, 22); ctx.quadraticCurveTo(72, 8, 120, 6); ctx.quadraticCurveTo(168, 8, 168, 22);
+    ctx.quadraticCurveTo(166, 20, 120, 18); ctx.quadraticCurveTo(74, 20, 72, 22); ctx.closePath();
+    ctx.fillStyle = '#1a1a1a'; ctx.fill(); ctx.strokeStyle = '#888'; ctx.lineWidth = 1.2; ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(120, 8); ctx.lineTo(120, 22); ctx.strokeStyle = '#555'; ctx.lineWidth = 1; ctx.stroke();
+    // Red plume
+    ctx.beginPath(); ctx.moveTo(120, 6); ctx.quadraticCurveTo(116, -8, 118, -14);
+    ctx.quadraticCurveTo(124, -8, 120, 6); ctx.fillStyle = '#c0392b'; ctx.fill();
+    ctx.beginPath(); ctx.moveTo(120, 6); ctx.quadraticCurveTo(122, -4, 126, -10);
+    ctx.quadraticCurveTo(124, -2, 120, 6); ctx.fillStyle = '#e74c3c'; ctx.fill();
+    // Wing ornaments
+    ctx.beginPath(); ctx.moveTo(72, 20); ctx.quadraticCurveTo(58, 14, 54, 20);
+    ctx.quadraticCurveTo(62, 24, 72, 22); ctx.fillStyle = '#444'; ctx.fill();
+    ctx.beginPath(); ctx.moveTo(168, 20); ctx.quadraticCurveTo(182, 14, 186, 20);
+    ctx.quadraticCurveTo(178, 24, 168, 22); ctx.fillStyle = '#444'; ctx.fill();
+    ctx.beginPath(); ctx.arc(120, 16, 4, 0, Math.PI*2); ctx.fillStyle = color; ctx.globalAlpha = 0.5; ctx.fill(); ctx.globalAlpha = 1;
+    ctx.restore();
+  }
+
+  // --- Scholar Costume ---
+  function drawScholarCostume(ctx, color) {
+    ctx.save();
+    // Outer robe
+    ctx.beginPath();
+    ctx.moveTo(30, 310); ctx.lineTo(30, 134); ctx.quadraticCurveTo(30, 120, 38, 119);
+    ctx.lineTo(38, 132); ctx.quadraticCurveTo(22, 122, 18, 110); ctx.lineTo(222, 110);
+    ctx.quadraticCurveTo(218, 122, 202, 132); ctx.lineTo(202, 119);
+    ctx.quadraticCurveTo(210, 120, 210, 134); ctx.lineTo(210, 310); ctx.closePath();
+    const sg = ctx.createLinearGradient(120, 110, 120, 310);
+    sg.addColorStop(0, '#2a3040'); sg.addColorStop(0.5, '#1e2638'); sg.addColorStop(1, '#161c2a');
+    ctx.fillStyle = sg; ctx.fill();
+    // Cross collar
+    ctx.beginPath(); ctx.moveTo(112, 128); ctx.lineTo(76, 195); ctx.lineTo(40, 310);
+    ctx.strokeStyle = '#d4ccb8'; ctx.lineWidth = 2.2; ctx.globalAlpha = 0.55; ctx.stroke(); ctx.globalAlpha = 1;
+    ctx.beginPath(); ctx.moveTo(128, 128); ctx.lineTo(164, 195); ctx.lineTo(200, 310);
+    ctx.strokeStyle = color; ctx.lineWidth = 1; ctx.globalAlpha = 0.25; ctx.stroke(); ctx.globalAlpha = 1;
+    // Inner layer
+    ctx.beginPath(); ctx.moveTo(118, 128); ctx.lineTo(90, 190); ctx.lineTo(150, 190); ctx.lineTo(122, 128); ctx.closePath();
+    ctx.fillStyle = 'rgba(230,220,200,0.22)'; ctx.fill();
+    // Wide sleeves
+    ctx.beginPath(); ctx.moveTo(30, 140); ctx.quadraticCurveTo(6, 172, 8, 215); ctx.quadraticCurveTo(12, 220, 20, 212);
+    ctx.strokeStyle = color; ctx.lineWidth = 1.4; ctx.globalAlpha = 0.25; ctx.stroke(); ctx.globalAlpha = 1;
+    ctx.beginPath(); ctx.moveTo(210, 140); ctx.quadraticCurveTo(234, 172, 232, 215); ctx.quadraticCurveTo(228, 220, 220, 212);
+    ctx.strokeStyle = color; ctx.lineWidth = 1.4; ctx.globalAlpha = 0.25; ctx.stroke(); ctx.globalAlpha = 1;
+    // Robe folds
+    ctx.beginPath(); ctx.moveTo(80, 180); ctx.lineTo(78, 305); ctx.strokeStyle = 'rgba(255,255,255,0.04)'; ctx.lineWidth = 1; ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(160, 180); ctx.lineTo(162, 305); ctx.strokeStyle = 'rgba(255,255,255,0.04)'; ctx.lineWidth = 1; ctx.stroke();
+    // Waist sash
+    ctx.beginPath(); ctx.moveTo(46, 195); ctx.lineTo(194, 195); ctx.strokeStyle = '#3a4058'; ctx.lineWidth = 3; ctx.globalAlpha = 0.45; ctx.stroke(); ctx.globalAlpha = 1;
+    // Right hand + scroll
+    ctx.fillStyle = '#e8d4b4'; ctx.beginPath(); ctx.ellipse(166, 170, 10, 7, 0.2, 0, Math.PI*2); ctx.fill();
+    ctx.strokeStyle = '#c4a078'; ctx.lineWidth = 0.7; ctx.stroke();
+    ctx.fillStyle = '#e8dcc8'; ctx.fillRect(158, 140, 5, 45);
+    ctx.strokeStyle = '#c0a878'; ctx.lineWidth = 0.7; ctx.strokeRect(158, 140, 5, 45);
+    for (let sy = 148; sy <= 172; sy += 8) {
+      ctx.beginPath(); ctx.moveTo(159, sy); ctx.lineTo(162, sy);
+      ctx.strokeStyle = '#c8b080'; ctx.lineWidth = 0.3; ctx.stroke();
+    }
+    // Left hand
+    ctx.fillStyle = '#e8d4b4'; ctx.beginPath(); ctx.ellipse(74, 170, 9, 6.5, -0.2, 0, Math.PI*2); ctx.fill();
+    ctx.strokeStyle = '#c4a078'; ctx.lineWidth = 0.7; ctx.stroke();
+    // Scholar cap
+    ctx.beginPath();
+    ctx.moveTo(68, 32); ctx.quadraticCurveTo(68, 16, 90, 14); ctx.quadraticCurveTo(120, 10, 150, 14);
+    ctx.quadraticCurveTo(172, 16, 172, 32);
+    ctx.quadraticCurveTo(168, 24, 120, 22); ctx.quadraticCurveTo(72, 24, 68, 32); ctx.closePath();
+    ctx.fillStyle = '#111'; ctx.fill(); ctx.strokeStyle = '#333'; ctx.lineWidth = 0.9; ctx.stroke();
+    ctx.beginPath(); ctx.ellipse(120, 19, 42, 10, 0, 0, Math.PI*2); ctx.fillStyle = '#1a1a1a'; ctx.fill();
+    // Cap wings
+    ctx.beginPath(); ctx.moveTo(72, 26); ctx.quadraticCurveTo(58, 28, 52, 38); ctx.quadraticCurveTo(48, 44, 52, 48);
+    ctx.strokeStyle = '#1a1a1a'; ctx.lineWidth = 4; ctx.lineCap = 'round'; ctx.globalAlpha = 0.65; ctx.stroke(); ctx.globalAlpha = 1;
+    ctx.beginPath(); ctx.moveTo(168, 26); ctx.quadraticCurveTo(182, 28, 188, 38); ctx.quadraticCurveTo(192, 44, 188, 48);
+    ctx.strokeStyle = '#1a1a1a'; ctx.lineWidth = 4; ctx.lineCap = 'round'; ctx.globalAlpha = 0.65; ctx.stroke(); ctx.globalAlpha = 1;
+    ctx.beginPath(); ctx.arc(120, 24, 3.5, 0, Math.PI*2); ctx.fillStyle = '#222'; ctx.fill();
+    ctx.restore();
+  }
+
+  function renderPortrait(canvas, figure) {
+    canvas.width = PW;
+    canvas.height = PH;
+    const ctx = canvas.getContext('2d');
+    const color = figure.group.color;
+    const type = figure.portraitType;
+
+    // Background
+    const bg = ctx.createRadialGradient(120, 100, 20, 120, 160, 200);
+    bg.addColorStop(0, '#1e1a28'); bg.addColorStop(1, '#0a0812');
+    ctx.fillStyle = bg;
+    ctx.fillRect(0, 0, PW, PH);
+
+    // Subtle aura
+    ctx.beginPath();
+    ctx.ellipse(120, 86, 50, 60, 0, 0, Math.PI * 2);
+    ctx.fillStyle = color;
+    ctx.globalAlpha = 0.035;
+    ctx.fill();
+    ctx.globalAlpha = 1;
+
+    const faceCx = 120, faceCy = 86;
+    const faceOpts = {
+      irises: [
+        { x: 96, y: 80, w: 21, h: 13.5, color: type === 'general' ? '#1a0800' : '#3a1a08' },
+        { x: 144, y: 80, w: 21, h: 13.5, color: type === 'general' ? '#1a0800' : '#3a1a08' }
+      ],
+      brows: type === 'general' ? [
+        { x1: 82, y1: 65, xc: 96, yc: 59, x2: 110, y2: 67, width: 2.6, color: '#1a0602' },
+        { x1: 130, y1: 67, xc: 144, yc: 59, x2: 158, y2: 65, width: 2.6, color: '#1a0602' }
+      ] : type === 'ruler' ? [
+        { x1: 83, y1: 66, xc: 96, yc: 61, x2: 109, y2: 66, width: 2.2, color: '#1a0804' },
+        { x1: 131, y1: 66, xc: 144, yc: 61, x2: 157, y2: 66, width: 2.2, color: '#1a0804' }
+      ] : [
+        { x1: 85, y1: 66, xc: 96, yc: 62, x2: 107, y2: 65, width: 1.6, color: '#2a1006' },
+        { x1: 133, y1: 65, xc: 144, yc: 62, x2: 155, y2: 66, width: 1.6, color: '#2a1006' }
+      ],
+      nose: { x: 120, y: 94 },
+      mouth: type === 'general' ? { x1: 110, x2: 130, my: 105, arc: 1.5 } :
+              type === 'ruler' ? { x1: 111, x2: 129, my: 104, arc: 1 } :
+              { x1: 112, x2: 128, my: 103, arc: -1 },
+      blush: [{ x: 76, y: 88, r: 13 }, { x: 164, y: 88, r: 13 }]
+    };
+
+    // Draw layers: hair back → costume → face → beard → hair front detail
+    drawMangaHair(ctx, faceCx, faceCy, '#140c06', 'full');
+
+    if (type === 'ruler') drawRulerCostume(ctx, color);
+    else if (type === 'general') drawGeneralCostume(ctx, color);
+    else drawScholarCostume(ctx, color);
+
+    drawMangaFace(ctx, faceCx, faceCy, faceOpts);
+
+    // Beard
+    if (type === 'ruler' || type === 'general') {
+      ctx.save();
+      ctx.beginPath();
+      ctx.moveTo(104, 106);
+      ctx.quadraticCurveTo(108, type === 'ruler' ? 148 : 132, 120, type === 'ruler' ? 158 : 138);
+      ctx.quadraticCurveTo(132, type === 'ruler' ? 148 : 132, 136, 106);
+      ctx.quadraticCurveTo(128, 112, 120, 113);
+      ctx.quadraticCurveTo(112, 112, 104, 106);
+      ctx.closePath();
+      const beardGrad = ctx.createLinearGradient(120, 106, 120, type === 'ruler' ? 158 : 138);
+      beardGrad.addColorStop(0, '#1a0c04'); beardGrad.addColorStop(1, '#0a0402');
+      ctx.fillStyle = beardGrad; ctx.fill();
+      for (let i = -3; i <= 3; i++) {
+        ctx.beginPath();
+        ctx.moveTo(120 + i*6, 108);
+        ctx.quadraticCurveTo(120 + i*4, type === 'ruler' ? 138 : 124, 120 + i*2, type === 'ruler' ? 154 : 134);
+        ctx.strokeStyle = 'rgba(0,0,0,0.22)';
+        ctx.lineWidth = 0.6;
+        ctx.stroke();
+      }
+      // Mustache
+      ctx.beginPath();
+      ctx.moveTo(108, 103); ctx.quadraticCurveTo(114, 107, 120, 103); ctx.quadraticCurveTo(114, 105, 108, 103);
+      ctx.fillStyle = '#1a0c04'; ctx.fill();
+      ctx.beginPath();
+      ctx.moveTo(132, 103); ctx.quadraticCurveTo(126, 107, 120, 103); ctx.quadraticCurveTo(126, 105, 132, 103);
+      ctx.fillStyle = '#1a0c04'; ctx.fill();
+      ctx.restore();
+    }
+
+    if (type === 'scholar') {
+      ctx.save();
+      ctx.beginPath();
+      ctx.moveTo(112, 106); ctx.quadraticCurveTo(114, 118, 116, 122);
+      ctx.quadraticCurveTo(118, 125, 120, 126); ctx.quadraticCurveTo(122, 125, 124, 122);
+      ctx.quadraticCurveTo(126, 118, 128, 106); ctx.closePath();
+      ctx.fillStyle = 'rgba(20,8,2,0.22)'; ctx.fill();
+      ctx.restore();
+    }
+
+    // Watermark
+    ctx.fillStyle = 'rgba(255,255,255,0.05)';
+    ctx.font = '9px "Microsoft YaHei", sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('古风漫画', 120, 315);
+  }
+
+  function getPortrait(f) {
+    const imgUrl = imageMap[f.name];
+    const canvas = document.createElement('canvas');
+    renderPortrait(canvas, f);
+    const fallback = canvas.toDataURL();
+    if (!imgUrl) {
+      return `<img src="${fallback}" width="120" height="160" style="border-radius:8px;display:block" alt="${f.name}">`;
+    }
+    return `<div style="position:relative;width:120px;height:160px;border-radius:8px;overflow:hidden">
+      <img src="${fallback}" width="120" height="160" style="display:block;position:absolute;inset:0" alt="">
+      <img src="${imgUrl}" onerror="this.remove()" onload="this.previousElementSibling.remove()" width="120" height="160" style="display:block;position:absolute;inset:0;object-fit:cover" alt="${f.name}">
+    </div>`;
+  }
+
+
+
+  // ═══════════════════════════════════════════════════════════════
+  // DATA: 50 figures with bios, events, and portrait types
+  // ═══════════════════════════════════════════════════════════════
+  const groups = [
+    {
+      name: "曹魏", color: "#4a90d9",
+      figures: [
+        { name: "曹操", birth: 155, death: 220, role: "魏武帝·奠基者", portraitType: "ruler",
+          bio: "东汉末年杰出的政治家、军事家、文学家，曹魏政权的奠基人。挟天子以令诸侯，先后消灭吕布、袁术、袁绍等割据势力，统一中国北方。用兵如神，知人善任，在文学上与曹丕、曹植并称「三曹」，开创建安文学新风。毛泽东评价其为「了不起的政治家、军事家，也是个了不起的诗人」。",
+          events: [[184,"任骑都尉，参与镇压黄巾起义"],[190,"与袁绍等诸侯组成讨董联军"],[192,"收编青州黄巾军三十万，实力大增"],[196,"迎汉献帝至许昌，开始「挟天子以令诸侯」"],[200,"官渡之战以少胜多，大败袁绍"],[207,"北征乌桓，彻底统一北方"],[208,"赤壁之战败于孙刘联军，三国鼎立之势形成"],[213,"受封魏公，建立魏国社稷"],[216,"进爵魏王，冕十二旒，驾六马"]] },
+        { name: "荀彧", birth: 163, death: 212, role: "王佐之才·尚书令", portraitType: "scholar",
+          bio: "曹操帐下第一谋士，被曹操誉为「吾之子房」。为曹操制定「深根固本以制天下」的战略方针，在官渡之战中力劝曹操坚守不退，终获全胜。为曹操举荐了荀攸、郭嘉、陈群、司马懿等大量人才，奠定了曹魏的人才基础。",
+          events: [[191,"离开袁绍，投奔曹操"],[194,"坚守鄄城，为曹操保住根本之地"],[196,"建议迎奉天子都许，取得政治优势"],[200,"官渡之战中坚定曹操作战决心"],[204,"反对恢复九州制，维护曹操集权"],[212,"反对曹操称魏公，被疏远，忧郁而终"]] },
+        { name: "郭嘉", birth: 170, death: 207, role: "军师祭酒·鬼才", portraitType: "scholar",
+          bio: "曹操早期最重要的谋士之一，以「深谋远虑、算无遗策」著称。在官渡决战前提出著名的「十胜十败」论，极大鼓舞了曹军士气。善于洞察人心，对孙策、袁绍等人的结局均有神准预判。惜英年早逝，曹操在赤壁战后痛哭「若奉孝在，不使孤至此」。",
+          events: [[196,"经荀彧推荐，与曹操论天下事，被赞「使孤成大业者，必此人也」"],[198,"献计水攻下邳，擒杀吕布"],[200,"提出「十胜十败」论，坚定官渡决战信心"],[203,"建言缓攻，使袁绍二子自相残杀"],[207,"力劝曹操远征乌桓，病逝于行军途中"]] },
+        { name: "司马懿", birth: 179, death: 251, role: "太傅·晋朝奠基人", portraitType: "general",
+          bio: "三国时期魏国杰出的政治家、军事家。曹操时代韬光养晦，曹丕、曹叡时期逐渐掌握兵权。用兵灵活多变，曾千里奔袭擒斩孟达，百日平定辽东公孙渊。与诸葛亮在五丈原相持百日，最终拖死对手。晚年发动高平陵政变，诛杀曹爽，彻底掌控魏国大权，为西晋代魏奠定基础。",
+          events: [[208,"曹操征辟，装病推辞后被迫出仕"],[219,"建议曹操联合东吴，解樊城关羽之围"],[228,"八日奔袭上庸，擒斩孟达"],[231,"开始与诸葛亮的数次陇西对峙"],[234,"五丈原与诸葛亮相持百日"],[238,"率军四万征辽东，屠公孙渊"],[239,"受魏明帝遗诏，与曹爽共同辅政"],[249,"发动高平陵之变，诛曹爽三族，独揽大权"]] },
+        { name: "曹丕", birth: 187, death: 226, role: "魏文帝·代汉开国", portraitType: "ruler",
+          bio: "曹操次子，曹魏开国皇帝。220年接受汉献帝禅让，正式建立魏国，完成由汉至魏的政权更替。在位期间推行九品中正制，对后世选官制度影响深远。在文学上造诣极高，所著《典论·论文》是中国文学批评史上的开山之作。",
+          events: [[204,"攻破邺城，纳甄氏为妻"],[211,"任五官中郎将，开始参与军政"],[217,"被立为魏王世子"],[220,"接受汉献帝禅让，登基称帝，改元黄初"],[221,"推行九品中正制"],[222,"三路大军伐吴，惨败而归"],[224,"著《典论》，开文学批评先河"]] },
+        { name: "曹植", birth: 192, death: 232, role: "陈思王·才高八斗", portraitType: "scholar",
+          bio: "曹操第三子，建安文学最杰出的代表。谢灵运曾言「天下才有一石，曹子建独占八斗」。其《洛神赋》被誉为千古绝唱，《白马篇》《七哀诗》等标志着文人五言诗的巅峰。与曹丕争嗣失败后饱受猜忌，后半生郁郁不得志，但其文学成就照耀千古。",
+          events: [[210,"铜雀台建成，即席作《登台赋》，曹操大悦"],[214,"随曹操南征孙权，留守邺城"],[217,"酒后擅开司马门，失去曹操信任"],[220,"曹丕称帝，七步成诗「本是同根生，相煎何太急」"],[221,"贬爵安乡侯，此后屡遭迁徙"],[223,"作《洛神赋》，文采斐然"]] },
+        { name: "邓艾", birth: 197, death: 264, role: "征西将军·灭蜀第一功", portraitType: "general",
+          bio: "三国时期魏国后期最杰出的将领之一。出身贫寒，因屯田有功逐渐崭露头角。长年与姜维在陇西周旋。263年率偏师偷渡阴平小道，翻越无人之境七百余里，直取成都，迫使蜀汉后主刘禅投降，创造了中国战争史上最辉煌的奇袭战例。",
+          events: [[240,"任典农中郎将，在淮南屯田积谷"],[249,"出任安西将军，开始在雍凉对抗姜维"],[256,"段谷之战大破姜维"],[263,"与钟会分兵伐蜀，偷渡阴平"],[263,"破江由、绵竹，兵临成都，刘禅出降"],[264,"遭钟会诬陷谋反，被收押，后遇害于途中"]] },
+      ]
+    },
+    {
+      name: "蜀汉", color: "#5cb860",
+      figures: [
+        { name: "关羽", birth: 160, death: 220, role: "前将军·汉寿亭侯", portraitType: "general",
+          bio: "蜀汉第一名将，被后世尊为「武圣」。早年与刘备、张飞桃园结义，一生忠义不二。白马之战中于万军中刺死颜良，解白马之围。镇守荆州期间威震华夏，水淹七军擒于禁斩庞德，一度逼得曹操欲迁都以避其锋。",
+          events: [[184,"与刘备、张飞结义，起兵讨黄巾"],[200,"身在曹营，斩颜良后封金挂印寻归刘备"],[208,"赤壁之战后奉命北断曹操退路"],[211,"镇守荆州，独当一面"],[215,"单刀赴会，与鲁肃据理力争"],[219,"北伐樊城，水淹七军、擒于禁斩庞德，威震华夏"],[219,"东吴吕蒙白衣渡江袭取荆州，败走麦城被擒杀"]] },
+        { name: "刘备", birth: 161, death: 223, role: "昭烈帝·蜀汉开国", portraitType: "ruler",
+          bio: "蜀汉开国皇帝。虽出身织席贩履，但以仁德服人，百折不挠。三顾茅庐请诸葛亮出山，联吴抗曹取得赤壁之胜。先后占据荆州、益州，于221年在成都称帝。为报关羽之仇发动夷陵之战，惨败后病逝白帝城，临终托孤于诸葛亮，成千古君臣典范。",
+          events: [[184,"组织义兵讨伐黄巾"],[194,"领徐州牧，初得立足之地"],[200,"兵败投袁绍，后南依刘表"],[207,"三顾茅庐，请诸葛亮出山"],[208,"联吴抗曹，赤壁之战大胜"],[214,"夺取益州，奠定蜀汉基业"],[219,"夺取汉中，进位汉中王"],[221,"在成都称帝，建立蜀汉"],[222,"夷陵之战被陆逊火烧连营，大败"],[223,"白帝城托孤诸葛亮"]] },
+        { name: "张飞", birth: 165, death: 221, role: "车骑将军·万人敌", portraitType: "general",
+          bio: "蜀汉猛将，与关羽并称「万人敌」。当阳长坂坡仅率二十骑据水断桥，曹军无人敢近。义释严颜、大破张郃，有勇有谋。然性暴虐，常鞭挞士卒，终在伐吴前夕被部下所害。",
+          events: [[184,"随刘备起兵"],[208,"长坂坡据水断桥，一喝退曹军"],[213,"义释严颜，收服巴郡"],[215,"巴西之战大破张郃"],[219,"拜右将军"],[221,"随刘备伐吴，出征前被部将范疆、张达刺杀"]] },
+        { name: "赵云", birth: 168, death: 229, role: "镇军将军·一身是胆", portraitType: "general",
+          bio: "蜀汉名将，以忠勇严谨著称。当阳长坂坡单骑救阿斗，在曹军中七进七出。随诸葛亮北伐时，在箕谷以寡敌众，亲自断后，诸葛亮赞其「一身是胆」。一生几乎未尝败绩，是蜀汉最受信赖的将领。",
+          events: [[200,"投奔刘备，从此追随左右"],[208,"长坂坡单骑救阿斗，血战曹军"],[211,"随刘备入蜀，平定益州各郡县"],[219,"汉中之战率数十骑冲曹军阵，被赞「一身是胆」"],[223,"刘备病逝后辅佐刘禅"],[228,"随诸葛亮第一次北伐，箕谷断后，全军而还"]] },
+        { name: "诸葛亮", birth: 181, death: 234, role: "丞相·千古名相", portraitType: "scholar",
+          bio: "中国历史上最著名的政治家、军事家、发明家之一。隐居隆中时即提出「三分天下」的《隆中对》。受刘备三顾之请出山，联吴抗曹，辅佐刘备建立蜀汉。刘禅即位后鞠躬尽瘁，五次北伐中原，最终积劳成疾病逝于五丈原军中。其木牛流马、诸葛连弩等发明影响深远，《出师表》为千古名篇。",
+          events: [[207,"刘备三顾茅庐，隆中对定三分之策"],[208,"出使东吴，促成孙刘联盟"],[214,"坐镇成都，足食足兵保障前线"],[221,"刘备病逝后受遗诏辅政"],[225,"南征孟获，七擒七纵平定南中"],[227,"上《出师表》，开始第一次北伐"],[228,"街亭之败，挥泪斩马谡"],[231,"发明木牛流马运粮"],[234,"第五次北伐，与司马懿对峙五丈原，病逝军中"]] },
+        { name: "姜维", birth: 202, death: 264, role: "大将军·九伐中原", portraitType: "general",
+          bio: "蜀汉后期的擎天之柱。原为魏将，被诸葛亮收服后视为衣钵传人。诸葛亮死后继承北伐大业，先后九次出兵中原，胜多败少。蜀汉灭亡后，策反钟会企图复国，事败被杀。",
+          events: [[228,"诸葛亮第一次北伐时归降蜀汉"],[234,"诸葛亮病逝，开始承担军事重任"],[247,"第一次独立北伐"],[256,"段谷之战"],[262,"第九次北伐"],[263,"邓艾偷渡阴平灭蜀，姜维率军降钟会"],[264,"策反钟会，图谋复国，事败身死"]] },
+      ]
+    },
+    {
+      name: "东吴", color: "#e65140",
+      figures: [
+        { name: "周瑜", birth: 175, death: 210, role: "大都督·火烧赤壁", portraitType: "general",
+          bio: "东吴第一任大都督，相貌英俊、精通音律，有「曲有误，周郎顾」之誉。与孙策为至交，助其平定江东。孙策死后辅佐孙权，在赤壁之战中以火攻击败曹操二十余万大军，奠定了三国鼎立的基础。惜英年早逝，年仅三十六岁。",
+          events: [[195,"与孙策共定江东"],[200,"孙策遇刺，率兵赴丧，辅佐孙权"],[208,"力主抗曹，赤壁之战中以火攻大破曹军"],[209,"南郡之战中箭伤重"],[210,"进言取蜀，行至巴丘病逝"]] },
+        { name: "孙权", birth: 182, death: 252, role: "吴大帝·三分天下", portraitType: "ruler",
+          bio: "东吴开国皇帝。十八岁继承父兄基业，以弱冠之年坐断东南。善于用人，信任周瑜取得赤壁大胜，倚重陆逊打赢夷陵之战。派卫温到达夷洲（台湾），是中国历史上首次以官方名义经营台湾。晚年猜忌心重，引发二宫之争，动摇国本。",
+          events: [[200,"兄长孙策遇刺，十八岁继位"],[208,"与刘备联合，赤壁之战大败曹操"],[215,"派步骘开拓交州"],[222,"夷陵之战中以陆逊为将大破刘备"],[229,"称帝，迁都建业"],[230,"派卫温、诸葛直到达夷洲（台湾）"],[242,"二宫之争爆发"]] },
+        { name: "陆逊", birth: 183, death: 245, role: "丞相·火烧连营", portraitType: "general",
+          bio: "东吴继周瑜、鲁肃、吕蒙之后的第四任大都督。夷陵之战中以火攻击破刘备连营七百里，一举挽救东吴危局。后出任丞相，文武双全。晚年卷入二宫之争，被孙权猜忌，忧愤而死。",
+          events: [[203,"入孙权幕府"],[219,"与吕蒙合谋袭取荆州，擒杀关羽"],[222,"夷陵之战火烧刘备七百里连营"],[228,"石亭之战大破曹休"],[244,"出任丞相"],[245,"因二宫之争被孙权责难，忧愤而死"]] },
+      ]
+    },
+    {
+      name: "西晋", color: "#ab47bc",
+      figures: [
+        { name: "阮籍", birth: 210, death: 263, role: "竹林七贤·青白眼", portraitType: "scholar",
+          bio: "竹林七贤之首，魏晋玄学代表人物。身处魏晋易代之际，以醉酒和「青白眼」表达对时局的不满。其八十二首《咏怀诗》开创了中国诗歌的咏怀传统，含蓄深沉，对后世影响极大。",
+          events: [[240,"与嵇康、山涛等游于竹林，世称「竹林七贤」"],[254,"被迫出任司马师的从事中郎"],[258,"为避司马昭提亲，大醉六十日"],[262,"为司马昭写劝进表，数月后郁郁而终"]] },
+        { name: "羊祜", birth: 221, death: 278, role: "征南大将军·仁者无敌", portraitType: "general",
+          bio: "西晋名将，坐镇荆州十年，以仁德感化吴人。与吴将陆抗在边境互赠酒药，传为千古佳话。临终前推荐杜预接替自己，为后来的灭吴大业做好准备。襄阳百姓在其生前即为其立碑，见者无不落泪，称「堕泪碑」。",
+          events: [[255,"夏侯霸降蜀，羊祜因姻亲关系受牵连"],[269,"出任都督荆州诸军事，镇守襄阳"],[272,"与吴将陆抗对峙，以仁德相待"],[276,"上《请伐吴疏》，建议伐吴"],[278,"病逝，临终举荐杜预自代"]] },
+        { name: "杜预", birth: 222, death: 285, role: "镇南大将军·文武双全", portraitType: "general",
+          bio: "西晋灭吴之战的统帅之一。精通兵法与经学，著有《春秋左氏经传集解》，是唯一同时配享文庙和武庙的历史人物。280年率军从荆州方向伐吴，势如破竹，直取建业。",
+          events: [[263,"参与伐蜀，为钟会长史"],[270,"任度支尚书，兴修水利"],[278,"接替羊祜为镇南大将军"],[280,"率军伐吴，攻破江陵，吴主孙皓投降"],[281,"继续镇守荆州，兴学劝农"]] },
+        { name: "嵇康", birth: 224, death: 262, role: "竹林七贤·广陵绝响", portraitType: "scholar",
+          bio: "竹林七贤的精神领袖，魏晋风度的化身。容貌俊美，才华横溢，善弹《广陵散》。因拒绝出仕司马氏、为吕安辩护，被司马昭处死。临刑时神色自若，索琴弹奏《广陵散》，叹「《广陵散》于今绝矣」，三千太学生为之请命不果。",
+          events: [[246,"娶曹操曾孙女，官拜中散大夫"],[250,"隐居山阳，与阮籍等竹林之游"],[255,"拒绝司马昭征召"],[260,"著《与山巨源绝交书》"],[262,"为吕安辩护入狱，被司马昭杀害"]] },
+        { name: "王濬", birth: 206, death: 286, role: "抚军大将军·楼船灭吴", portraitType: "general",
+          bio: "西晋灭吴的水军统帅。在益州建造楼船，大舰可载两千余人。280年率水师从成都顺江而下，以火攻烧断吴军横江铁索，先于王浑攻入建业，接受吴主孙皓投降。刘禹锡诗句「王濬楼船下益州，金陵王气黯然收」即咏此事。",
+          events: [[272,"任益州刺史，开始督造楼船"],[279,"上书请伐吴"],[280,"率水师八万顺江东下，连克西陵、武昌"],[280,"攻克建业，接受孙皓投降"]] },
+        { name: "司马炎", birth: 236, death: 290, role: "晋武帝·统一三国", portraitType: "ruler",
+          bio: "西晋开国皇帝。继承祖父司马懿、伯父司马师、父亲司马昭三代经营，于265年代魏称帝。280年灭吴，结束汉末以来近百年分裂局面。在位前期勤政节俭，但后期沉溺声色，大封宗室为王，种下八王之乱的祸根。",
+          events: [[265,"接受曹奂禅让，建立西晋"],[268,"颁布《泰始律》"],[280,"发兵灭吴，统一天下"],[280,"颁布占田制、课田制"],[289,"大封宗室二十七人为王"]] },
+      ]
+    },
+    {
+      name: "十六国", color: "#ff8f00",
+      figures: [
+        { name: "刘渊", birth: 251, death: 310, role: "汉赵开国皇帝", portraitType: "ruler",
+          bio: "十六国时期汉赵（前赵）的开国皇帝，匈奴族。自称继承汉朝正统，追尊刘禅为孝怀皇帝。304年趁西晋八王之乱称王建政，拉开了五胡十六国时代的序幕。文武双全，精通汉文典籍。",
+          events: [[279,"入洛阳为质，受晋武帝赏识"],[290,"任北部都尉"],[304,"趁八王之乱，称汉王建元"],[308,"正式称帝"],[309,"两次攻打洛阳"]] },
+        { name: "石勒", birth: 274, death: 333, role: "后赵开国皇帝", portraitType: "ruler",
+          bio: "十六国时期后赵的开国皇帝，羯族。出身奴隶，是中国历史上唯一从奴隶到皇帝的人物。善于用兵，军事才能卓绝。在位期间兴办学校、劝课农桑，对北方经济的恢复有一定贡献。",
+          events: [[303,"被掠卖为奴，后投奔汲桑"],[307,"投靠刘渊"],[312,"设「君子营」，延揽汉族士人"],[319,"建立后赵，自称赵王"],[328,"灭前赵，统一北方大部"]] },
+        { name: "王猛", birth: 325, death: 375, role: "前秦丞相·功盖诸葛", portraitType: "scholar",
+          bio: "十六国时期前秦的丞相，被苻坚视为「吾之子房、孔明再生」。出身贫寒，曾「扪虱谈天下」与苻坚一见如故。辅佐苻坚打击豪强、整顿吏治、发展经济，使前秦成为北方最强大的政权。临终前力劝苻坚不要南征东晋，苻坚不听，后果有淝水之败。",
+          events: [[354,"与苻坚一见如故，「扪虱谈天下」"],[357,"出任中书令，开始改革"],[359,"诛杀豪强樊世，震慑不法贵族"],[370,"率军灭前燕"],[375,"病逝，临终遗言「愿勿以晋为图」"]] },
+        { name: "慕容垂", birth: 326, death: 396, role: "后燕开国皇帝", portraitType: "general",
+          bio: "十六国时期后燕的开国皇帝，鲜卑族。早年在前燕屡立战功，遭猜忌后投奔前秦苻坚。淝水之战后趁乱复国，以六十余岁高龄征战四方，几乎恢复了前燕全盛时期的版图。被称为十六国后期最杰出的军事统帅。",
+          events: [[354,"率前燕军大破敕勒"],[369,"枋头之战大败桓温北伐军"],[370,"受前燕权臣迫害，投奔苻坚"],[383,"淝水之战后请命安抚河北，趁机脱离前秦"],[384,"称燕王，建立后燕"],[395,"参合陂之战大败北魏"]] },
+        { name: "苻坚", birth: 338, death: 385, role: "前秦皇帝·淝水憾败", portraitType: "ruler",
+          bio: "十六国时期前秦皇帝，氐族。在位前期励精图治，任用王猛进行改革，先后灭前燕、前凉、代国，统一中国北方。但在王猛去世后急于统一天下，不顾群臣反对发动淝水之战，大败而归，前秦迅速土崩瓦解，自己被姚苌缢杀。",
+          events: [[357,"发动政变夺位，任用王猛改革"],[370,"灭前燕，统一北方"],[376,"灭前凉、代国"],[378,"攻占东晋襄阳"],[383,"发动淝水之战，大败于谢玄"],[384,"慕容垂、姚苌相继叛离"],[385,"被姚苌俘获缢杀"]] },
+      ]
+    },
+    {
+      name: "东晋", color: "#26a69a",
+      figures: [
+        { name: "王导", birth: 276, death: 339, role: "丞相·江左管夷吾", portraitType: "scholar",
+          bio: "东晋开国元勋，辅佐司马睿在建康建立东晋政权。善于调和南北士族矛盾，稳定了东晋初年的政治局面。成语「楚囚对泣」「新亭对泣」均与其有关。桓彝赞其为「江左管夷吾」。",
+          events: [[307,"随司马睿南渡建康"],[313,"联络江东士族，奠定东晋根基"],[317,"司马睿称晋王，王导任丞相"],[322,"王敦之乱，王导率族人在宫门前待罪"],[325,"辅佐晋明帝平定王敦之乱"],[338,"主持东晋朝政三十年，稳定江左局面"]] },
+        { name: "王羲之", birth: 303, death: 361, role: "书圣·兰亭序", portraitType: "scholar",
+          bio: "中国历史上最伟大的书法家，被尊为「书圣」。其行书《兰亭序》被称为「天下第一行书」。353年与谢安等四十一人在会稽山阴兰亭修禊，微醉中写下《兰亭序》，酒醒后多次重写均不如原作，叹为神助。唐太宗对其书法推崇备至，以《兰亭序》真迹陪葬昭陵。",
+          events: [[323,"随父学书，师从卫夫人"],[353,"兰亭修禊，写下千古名篇《兰亭序》"],[355,"辞官归隐，寄情山水"],[361,"病逝，享年五十九"]] },
+        { name: "桓温", birth: 312, death: 373, role: "大司马·三次北伐", portraitType: "general",
+          bio: "东晋权臣，坐镇荆州总揽长江中上游军政大权。雄才大略，先后三次北伐中原，取得过攻占洛阳的辉煌胜利。但其专擅朝政，「不能流芳百世，亦当遗臭万年」即出其口。第三次北伐在枋头败于慕容垂，威望大损。",
+          events: [[346,"灭成汉，收复益州"],[354,"第一次北伐，攻入关中"],[356,"第二次北伐，收复洛阳"],[363,"加九锡，权势达到顶峰"],[369,"第三次北伐，在枋头惨败于慕容垂"],[371,"废海西公，立简文帝"]] },
+        { name: "谢安", birth: 320, death: 385, role: "太傅·淝水之战总指挥", portraitType: "scholar",
+          bio: "东晋名相，淝水之战的总指挥。早年隐居会稽东山，四十余岁方出仕，成语「东山再起」即源于此。383年前秦苻坚率百万大军南下，谢安坐镇建康运筹帷幄，以八万北府兵大破秦军。捷报传来时他正在下棋，看后神色不变继续落子，人问何事，答「小儿辈遂已破贼」，展现了超凡的定力。",
+          events: [[360,"隐居东山二十年，四十余岁出仕"],[373,"辅助王坦之对抗桓温"],[377,"举荐谢玄组建北府兵"],[383,"淝水之战总揽全局，大破苻坚"],[384,"命谢玄北伐，收复徐兖青豫等州"],[385,"功高遭忌，自请出镇广陵"]] },
+        { name: "谢玄", birth: 343, death: 388, role: "车骑将军·北府兵创建者", portraitType: "general",
+          bio: "东晋名将，谢安之侄。受谢安举荐组建并训练北府兵，使之成为东晋最精锐的部队。淝水之战中任前锋都督，亲率八千精兵渡淝水突击，大破前秦三十万大军，创造了战争史上以少胜多的经典战例。",
+          events: [[377,"受谢安举荐，招募组建北府兵"],[379,"在淮南多次击败前秦军队"],[383,"淝水之战任前锋，大破前秦军"],[384,"乘胜北伐，收复河南大片失地"],[387,"因病解甲"]] },
+        { name: "顾恺之", birth: 344, death: 406, role: "三绝画圣·女史箴图", portraitType: "scholar",
+          bio: "东晋最伟大的画家，被称为才绝、画绝、痴绝的「三绝」。所绘《女史箴图》《洛神赋图》是中国绘画史上的不朽杰作，首次提出了「以形写神」「迁想妙得」等绘画理论，对后世中国画影响极为深远。",
+          events: [[363,"为瓦官寺绘维摩诘像，一举成名"],[380,"创作《女史箴图》"],[395,"任散骑常侍"],[400,"创作《洛神赋图》"]] },
+        { name: "陶渊明", birth: 365, death: 427, role: "田园诗人·桃花源记", portraitType: "scholar",
+          bio: "中国文学史上最伟大的田园诗人，被誉为「隐逸诗人之宗」。因「不为五斗米折腰」而辞去彭泽县令归隐田园，从此过着「采菊东篱下，悠然见南山」的生活。所著《桃花源记》描绘了一个美好的理想社会，影响了中国文人千余年。",
+          events: [[393,"首次出仕，任江州祭酒"],[398,"入桓玄幕府"],[405,"任彭泽县令，八十余日即「不为五斗米折腰」辞官归隐"],[406,"归隐后创作大量田园诗"],[420,"刘裕代晋建宋，陶渊明此后只书甲子不书年号"],[421,"创作《桃花源记》"]] },
+      ]
+    },
+    {
+      name: "南朝", color: "#ef5350",
+      figures: [
+        { name: "刘裕", birth: 363, death: 422, role: "宋武帝·气吞万里如虎", portraitType: "ruler",
+          bio: "南朝宋的开国皇帝，出身寒门，从低级军官起家。先后平定桓玄之乱、灭南燕、剿卢循、灭后秦，战功赫赫。辛弃疾赞其「金戈铁马，气吞万里如虎」。420年代晋建宋，南朝历史由此开始。",
+          events: [[399,"参加北府兵，讨伐孙恩起义"],[404,"讨伐桓玄，迎晋安帝复位"],[409,"北伐灭南燕"],[413,"平定卢循起义"],[416,"北伐灭后秦，收复长安"],[420,"受禅代晋，建立宋朝"]] },
+        { name: "檀道济", birth: 373, death: 436, role: "名将·三十六计", portraitType: "general",
+          bio: "南朝宋名将，相传为《三十六计》的整理者。随刘裕南征北战，屡建奇功。北伐时为救全军，唱筹量沙迷惑敌军，成为军事史上的经典计谋。后被彭城王刘义康矫诏杀害，临死前怒斥「乃坏汝万里长城」，成为千古悲歌。",
+          events: [[404,"投奔刘裕，开始从军"],[409,"随刘裕伐南燕"],[416,"随刘裕北伐后秦"],[424,"参与废黜少帝"],[431,"北伐北魏，唱筹量沙退敌"],[436,"被冤杀，死前叱「乃坏汝万里长城」"]] },
+        { name: "谢灵运", birth: 385, death: 433, role: "山水诗派鼻祖", portraitType: "scholar",
+          bio: "中国文学史上山水诗派的开创者。谢玄之孙，袭封康乐公。才华横溢但恃才傲物，政治上一再受挫。其山水诗清新自然，「池塘生春草，园柳变鸣禽」为千古名句。后被诬谋反，流放广州处死。",
+          events: [[405,"袭封康乐公"],[420,"刘宋代晋，降爵为侯"],[422,"出任永嘉太守，纵情山水"],[426,"归隐会稽始宁别墅"],[431,"得罪地方官，被劾谋反"],[433,"流放广州，被处死"]] },
+        { name: "鲍照", birth: 414, death: 466, role: "寒士诗人·拟行路难", portraitType: "scholar",
+          bio: "南朝宋最重要的诗人之一，与谢灵运、颜延之并称「元嘉三大家」。出身寒微，诗作多表达才士不遇的悲愤。《拟行路难》十八首慷慨激昂，对唐代李白、岑参等人影响深远。后在刘子勋之乱中为乱兵所杀。",
+          events: [[439,"献诗临川王刘义庆，获得赏识"],[445,"任国侍郎"],[460,"任秣陵令"],[466,"卷入刘子勋之乱，为乱兵所杀"]] },
+        { name: "萧道成", birth: 427, death: 482, role: "齐高帝·南齐开国", portraitType: "ruler",
+          bio: "南朝齐的开国皇帝。在刘宋末年混乱政局中逐渐掌控大权，479年代宋建齐。在位期间提倡节俭，打击奢侈之风，使南齐初年政治相对清明。",
+          events: [[453,"随军讨伐刘劭"],[466,"平定刘子勋之乱"],[474,"平定桂阳王刘休范之乱"],[477,"废杀后废帝刘昱，立刘准为帝"],[479,"受禅代宋建齐"]] },
+        { name: "沈约", birth: 441, death: 513, role: "文坛宗主·四声八病", portraitType: "scholar",
+          bio: "南朝梁代文坛领袖，与谢朓、王融等共创「永明体」。提出诗歌音律的「四声八病」说，推动了古体诗向格律诗的发展。所著《宋书》为二十四史之一。历仕宋齐梁三朝，是当时公认的文坛宗主。",
+          events: [[461,"任奉朝请，开始仕途"],[478,"入竟陵王萧子良西邸，为「竟陵八友」之一"],[487,"参与编撰《四声谱》"],[502,"拥立萧衍称帝，封侯"],[510,"修成《宋书》"]] },
+        { name: "萧衍", birth: 464, death: 549, role: "梁武帝·舍身同泰寺", portraitType: "ruler",
+          bio: "南朝梁的开国皇帝，在位四十八年，是南朝在位最久的皇帝。早年励精图治，文化繁荣。晚年沉迷佛教，四次舍身同泰寺，每次由群臣花巨资赎出。最终引发侯景之乱，被困台城活活饿死，临终叹「自我得之，自我失之」。",
+          events: [[498,"为南齐雍州刺史"],[501,"起兵讨伐东昏侯"],[502,"受禅建梁"],[527,"第一次舍身同泰寺"],[536,"第四次舍身同泰寺"],[547,"接纳东魏降将侯景"],[548,"侯景叛乱，包围建康台城"],[549,"台城陷落，被饿死"]] },
+        { name: "陈霸先", birth: 503, death: 559, role: "陈武帝·力挽狂澜", portraitType: "general",
+          bio: "南朝陈的开国皇帝。在侯景之乱中率军勤王，平定侯景之乱后逐步统一江南。557年代梁建陈，是南朝最后一位开国皇帝。在位期间重建江南秩序，但仅三年即病逝。",
+          events: [[548,"侯景之乱爆发，率军勤王"],[551,"大败侯景军，收复建康"],[553,"讨平王僧辩"],[555,"击退北齐入侵"],[557,"受禅代梁建陈"]] },
+      ]
+    },
+    {
+      name: "北朝", color: "#5c6bc0",
+      figures: [
+        { name: "拓跋珪", birth: 371, death: 409, role: "北魏道武帝·代国复兴", portraitType: "ruler",
+          bio: "北魏的开国皇帝，鲜卑族拓跋部首领。十六岁时即趁前秦崩溃之际恢复代国，后改国号为魏。参合陂之战大破后燕，奠定了北魏在华北的霸权。晚年猜忌多疑，被儿子拓跋绍刺杀。",
+          events: [[386,"牛川大会，即代王位，恢复代国"],[386,"改国号为魏，是为北魏"],[395,"参合陂之战大败后燕"],[396,"攻占后燕都城中山"],[398,"迁都平城，称帝"],[409,"被次子拓跋绍刺杀"]] },
+        { name: "拓跋焘", birth: 408, death: 452, role: "北魏太武帝·统一北方", portraitType: "ruler",
+          bio: "北魏第三位皇帝，雄才大略的军事统帅。先后灭夏、北燕、北凉，于439年统一中国北方，结束了五胡十六国一百多年的分裂局面。在位期间推行灭佛政策，是中国历史上「三武一宗」灭佛中的第一武。",
+          events: [[427,"灭夏国"],[431,"灭北燕"],[439,"灭北凉，统一北方"],[446,"下诏灭佛"],[450,"南征刘宋，兵临瓜步"],[452,"被宦官宗爱刺杀"]] },
+        { name: "拓跋宏", birth: 467, death: 499, role: "北魏孝文帝·汉化改革", portraitType: "ruler",
+          bio: "北魏最伟大的改革家。亲政后推行全面汉化政策：迁都洛阳、禁鲜卑语改说汉语、改鲜卑姓氏为汉姓、鼓励胡汉通婚。这些改革极大地促进了民族融合，但也激化了鲜卑保守势力的不满，为后来北魏的分裂埋下了隐患。",
+          events: [[471,"五岁即位，由冯太后临朝"],[490,"冯太后去世，开始亲政"],[493,"以南征为名迁都洛阳"],[495,"禁鲜卑语，改说汉语；改鲜卑服为汉服"],[496,"改皇室拓跋姓为元姓"],[497,"全面推行均田制和租调制"]] },
+        { name: "郦道元", birth: 470, death: 527, role: "地理学家·水经注", portraitType: "scholar",
+          bio: "北魏杰出的地理学家、文学家。所著《水经注》记载了一千二百多条河流的地理沿革、山川风物，是中国古代最全面、最系统的地理学著作。其文笔优美绚烂，「巴东三峡巫峡长，猿鸣三声泪沾裳」即出自其手。",
+          events: [[490,"入仕为尚书祠部"],[500,"开始为《水经》作注"],[510,"《水经注》基本完成"],[520,"任东荆州刺史"],[527,"被叛臣萧宝夤杀害"]] },
+        { name: "高欢", birth: 496, death: 547, role: "东魏权臣·北齐奠基人", portraitType: "general",
+          bio: "东魏的实际建立者，北齐的奠基人。本为北魏边镇小吏，在六镇起义中崛起。控制北魏朝政后与宇文泰决裂，北魏分裂为东魏和西魏。与宇文泰多次交战互有胜负，但始终未能统一北方。其子高洋后建北齐。",
+          events: [[525,"参加六镇起义"],[531,"控制北魏朝政"],[534,"北魏分裂，拥立东魏孝静帝"],[537,"沙苑之战惨败于宇文泰"],[543,"邙山之战击败西魏"],[546,"围攻玉壁不克"]] },
+        { name: "宇文泰", birth: 507, death: 556, role: "西魏权臣·北周奠基人", portraitType: "general",
+          bio: "西魏的实际建立者，北周的奠基人。在六镇起义中崛起，后据关陇与高欢对抗。创立府兵制，将军事与生产结合，打造了强大的关陇军事集团。其子宇文觉后建北周，再传至宇文邕统一北方，最终由杨坚完成天下统一。",
+          events: [[530,"随父参加六镇起义"],[534,"拥立西魏文帝，与高欢对抗"],[537,"沙苑之战以少胜多击败高欢"],[543,"创立府兵制"],[554,"攻占梁朝江陵"]] },
+        { name: "庾信", birth: 513, death: 581, role: "文学大家·哀江南赋", portraitType: "scholar",
+          bio: "南北朝后期最杰出的文学家。本为南朝梁臣，出使西魏时被强留北方。其后文风大变，将南方的华美辞藻与北方的刚健气质融为一体。《哀江南赋》以赋体写家国兴亡，沉郁苍凉，被杜甫赞为「庾信文章老更成」。",
+          events: [[545,"任梁朝东宫学士"],[554,"出使西魏，被扣留长安不归"],[557,"仕于北周"],[575,"官至骠骑大将军"],[578,"创作《哀江南赋》"]] },
+      ]
+    },
+    {
+      name: "隋", color: "#f9a825",
+      figures: [
+        { name: "杨坚", birth: 541, death: 604, role: "隋文帝·结束三百年分裂", portraitType: "ruler",
+          bio: "隋朝开国皇帝。581年接受北周静帝禅让建立隋朝，589年灭陈，结束了自东汉末年以来近四百年的分裂局面。在位期间推行均田制、改革官制、创立科举制，开创了「开皇之治」的盛世。其所创制度多为唐朝继承，影响中国历史逾千年。",
+          events: [[568,"袭父爵为随国公"],[578,"女儿嫁给北周宣帝，成为外戚"],[580,"平定尉迟迥之乱，控制北周大权"],[581,"接受禅让称帝，建立隋朝"],[583,"迁都大兴城（长安新城）"],[587,"废西梁"],[589,"灭陈，统一天下"],[597,"创立科举取士制度"],[604,"病逝（一说被杨广弑杀）"]] },
+      ]
+    },
+  ];
+
+  // ── Image URLs (Wikimedia Commons historical portraits) ──
+  const imageMap = {
+    "曹操": "https://upload.wikimedia.org/wikipedia/commons/1/1f/Cao_Cao_Portrait_ROTK.jpg",
+    "荀彧": "",
+    "郭嘉": "",
+    "司马懿": "https://upload.wikimedia.org/wikipedia/commons/8/80/Sima_Yi.jpg",
+    "曹丕": "",
+    "曹植": "",
+    "邓艾": "",
+    "关羽": "https://upload.wikimedia.org/wikipedia/commons/3/3e/Guan_Yu_Portrait.jpg",
+    "刘备": "https://upload.wikimedia.org/wikipedia/commons/0/0e/Portraits_of_Famous_Men_-_Liu_Bei.jpg",
+    "张飞": "https://upload.wikimedia.org/wikipedia/commons/5/5e/Zhang_Fei.jpg",
+    "赵云": "https://upload.wikimedia.org/wikipedia/commons/d/d6/Zhao_Yun.jpg",
+    "诸葛亮": "https://upload.wikimedia.org/wikipedia/commons/0/07/Zhuge_Liang.jpg",
+    "姜维": "",
+    "周瑜": "",
+    "孙权": "https://upload.wikimedia.org/wikipedia/commons/6/68/Sun_Quan_Tang.jpg",
+    "陆逊": "",
+    "阮籍": "",
+    "羊祜": "",
+    "杜预": "",
+    "嵇康": "",
+    "王濬": "",
+    "司马炎": "https://upload.wikimedia.org/wikipedia/commons/1/15/Emperor_Wu_of_Jin.jpg",
+    "刘渊": "",
+    "石勒": "",
+    "王猛": "",
+    "慕容垂": "",
+    "苻坚": "",
+    "王导": "",
+    "王羲之": "https://upload.wikimedia.org/wikipedia/commons/2/2f/Wang_Xizhi.jpg",
+    "桓温": "",
+    "谢安": "",
+    "谢玄": "",
+    "顾恺之": "",
+    "陶渊明": "",
+    "刘裕": "",
+    "檀道济": "",
+    "谢灵运": "",
+    "鲍照": "",
+    "萧道成": "",
+    "沈约": "",
+    "萧衍": "",
+    "陈霸先": "",
+    "拓跋珪": "",
+    "拓跋焘": "",
+    "拓跋宏": "",
+    "郦道元": "",
+    "高欢": "",
+    "宇文泰": "",
+    "庾信": "",
+    "杨坚": "https://upload.wikimedia.org/wikipedia/commons/7/7f/Sui_Wendi.jpg",
+  };
+
+  // ── Region mappings ──
+  // Regions: zhongyuan, hebei, guanzhong, bashu, jingzhou, jiangdong, saibei, hexi, lingnan
+  const figureRegions = {
+    "曹操": ["zhongyuan","hebei"], "荀彧": ["zhongyuan"], "郭嘉": ["zhongyuan"],
+    "司马懿": ["zhongyuan","guanzhong","hebei"], "曹丕": ["zhongyuan","hebei"],
+    "曹植": ["zhongyuan"], "邓艾": ["zhongyuan","bashu"],
+    "关羽": ["zhongyuan","jingzhou"], "刘备": ["hebei","bashu","jingzhou"],
+    "张飞": ["bashu","jingzhou"], "赵云": ["hebei","bashu"],
+    "诸葛亮": ["jingzhou","bashu","guanzhong"], "姜维": ["bashu","guanzhong"],
+    "周瑜": ["jiangdong"], "孙权": ["jiangdong"],
+    "陆逊": ["jiangdong","jingzhou"],
+    "阮籍": ["zhongyuan"], "羊祜": ["jingzhou","zhongyuan"],
+    "杜预": ["guanzhong","jingzhou","jiangdong"], "嵇康": ["zhongyuan"],
+    "王濬": ["bashu","jiangdong"], "司马炎": ["zhongyuan"],
+    "刘渊": ["saibei","zhongyuan"], "石勒": ["hebei","zhongyuan"],
+    "王猛": ["guanzhong"], "慕容垂": ["hebei","saibei"],
+    "苻坚": ["guanzhong","zhongyuan"],
+    "王导": ["jiangdong"], "王羲之": ["jiangdong"],
+    "桓温": ["jingzhou","zhongyuan"], "谢安": ["jiangdong"],
+    "谢玄": ["jiangdong","zhongyuan"], "顾恺之": ["jiangdong"],
+    "陶渊明": ["jiangdong"],
+    "刘裕": ["jiangdong","zhongyuan","guanzhong"], "檀道济": ["jiangdong","zhongyuan"],
+    "谢灵运": ["jiangdong"], "鲍照": ["jiangdong"],
+    "萧道成": ["jiangdong"], "沈约": ["jiangdong"],
+    "萧衍": ["jiangdong"], "陈霸先": ["jiangdong","lingnan"],
+    "拓跋珪": ["saibei","hebei"], "拓跋焘": ["saibei","hebei","zhongyuan"],
+    "拓跋宏": ["hebei","zhongyuan"], "郦道元": ["hebei","zhongyuan"],
+    "高欢": ["hebei","zhongyuan"], "宇文泰": ["guanzhong"],
+    "庾信": ["jiangdong","guanzhong"],
+    "杨坚": ["guanzhong","zhongyuan"],
+  };
+
+  // Flatten
+  let allFigures = [];
+  let rowIndex = 0;
+  groups.forEach(g => {
+    g.startRow = rowIndex;
+    g.figures.forEach(f => { f.group = g; allFigures.push(f); rowIndex++; });
+    g.endRow = rowIndex;
+  });
+
+  // ═══════════════════════════════════════════════════════════════
+  // CONFIG
+  // ═══════════════════════════════════════════════════════════════
+  const YEAR_MIN = 150, YEAR_MAX = 610;
+  const PX_PER_YEAR = 3.3;
+  const CHART_START_X = 175;
+  const ROW_HEIGHT = 26;
+  const GROUP_HEADER_HEIGHT = 30;
+  const TOP_HEADER_HEIGHT = 90;
+  const CHART_WIDTH = (YEAR_MAX - YEAR_MIN) * PX_PER_YEAR;
+  const SVG_WIDTH = CHART_START_X + CHART_WIDTH + 40;
+
+  let yPositions = [];
+  let currentY = TOP_HEADER_HEIGHT;
+  groups.forEach(g => {
+    currentY += GROUP_HEADER_HEIGHT;
+    g.headerY = currentY - GROUP_HEADER_HEIGHT;
+    g.figures.forEach(() => { yPositions.push(currentY); currentY += ROW_HEIGHT; });
+  });
+  const SVG_HEIGHT = currentY + 10;
+
+  // ═══════════════════════════════════════════════════════════════
+  // BUILD SVG CHART
+  // ═══════════════════════════════════════════════════════════════
+  const svg = document.getElementById('chart');
+  svg.setAttribute('width', SVG_WIDTH);
+  svg.setAttribute('height', SVG_HEIGHT);
+
+  function el(tag, attrs) {
+    const e = document.createElementNS('http://www.w3.org/2000/svg', tag);
+    for (let [k, v] of Object.entries(attrs)) {
+      if (k === 'textContent') e.textContent = v;
+      else if (k.startsWith('on')) e.addEventListener(k.slice(2).toLowerCase(), v);
+      else e.setAttribute(k, v);
+    }
+    return e;
+  }
+
+  svg.appendChild(el('rect', { x: 0, y: 0, width: SVG_WIDTH, height: SVG_HEIGHT, fill: '#12121f' }));
+
+  // Era bands
+  [{ label: '东汉末', start: 184, end: 220, color: '#888' },
+   { label: '三国', start: 220, end: 280, color: '#4a90d9' },
+   { label: '西晋', start: 265, end: 316, color: '#ab47bc' },
+   { label: '东晋十六国', start: 317, end: 420, color: '#26a69a' },
+   { label: '南北朝', start: 420, end: 589, color: '#ef5350' },
+   { label: '隋', start: 581, end: 618, color: '#f9a825' }].forEach(era => {
+    const x = CHART_START_X + (era.start - YEAR_MIN) * PX_PER_YEAR;
+    const w = (era.end - era.start) * PX_PER_YEAR;
+    svg.appendChild(el('rect', { x, y: 0, width: w, height: TOP_HEADER_HEIGHT - 10, fill: era.color, class: 'era-band' }));
+    if (w > 40) svg.appendChild(el('text', { x: x + w / 2, y: TOP_HEADER_HEIGHT - 22, 'text-anchor': 'middle', class: 'era-label-text', textContent: era.label }));
+  });
+
+  // Year axis
+  for (let year = 150; year <= 610; year += 10) {
+    const x = CHART_START_X + (year - YEAR_MIN) * PX_PER_YEAR;
+    const isMajor = year % 50 === 0, tickH = isMajor ? 14 : 7;
+    svg.appendChild(el('line', { x1: x, y1: TOP_HEADER_HEIGHT - 10 - tickH, x2: x, y2: TOP_HEADER_HEIGHT - 10, stroke: isMajor ? '#666' : '#333', 'stroke-width': isMajor ? 1 : 0.5 }));
+    if (isMajor) svg.appendChild(el('text', { x, y: TOP_HEADER_HEIGHT - 10 - tickH - 5, 'text-anchor': 'middle', fill: '#777', 'font-size': 11, textContent: year + '年' }));
+  }
+
+  // Gridlines
+  for (let year = 200; year <= 600; year += 50) {
+    const x = CHART_START_X + (year - YEAR_MIN) * PX_PER_YEAR;
+    svg.appendChild(el('line', { x1: x, y1: TOP_HEADER_HEIGHT, x2: x, y2: SVG_HEIGHT, stroke: '#1e1e35', 'stroke-width': 0.5 }));
+  }
+
+  // Key events
+  [{ year: 208, label: '赤壁之战', color: '#e65140' },{ year: 220, label: '曹丕称帝', color: '#4a90d9' },{ year: 263, label: '魏灭蜀', color: '#4a90d9' },{ year: 280, label: '晋统一', color: '#ab47bc' },{ year: 316, label: '西晋亡', color: '#ab47bc' },{ year: 383, label: '淝水之战', color: '#ff8f00' },{ year: 420, label: '刘裕建宋', color: '#ef5350' },{ year: 439, label: '北魏统一北方', color: '#5c6bc0' },{ year: 534, label: '北魏分裂', color: '#5c6bc0' },{ year: 589, label: '隋统一', color: '#f9a825' }].forEach(ev => {
+    const x = CHART_START_X + (ev.year - YEAR_MIN) * PX_PER_YEAR;
+    svg.appendChild(el('line', { x1: x, y1: TOP_HEADER_HEIGHT, x2: x, y2: SVG_HEIGHT, stroke: ev.color, 'stroke-width': 0.7, 'stroke-dasharray': '4,4', class: 'event-line' }));
+    svg.appendChild(el('text', { x: x - 2, y: TOP_HEADER_HEIGHT + 10, transform: `rotate(-65, ${x - 2}, ${TOP_HEADER_HEIGHT + 10})`, 'text-anchor': 'end', fill: ev.color, 'font-size': 9, class: 'event-label', textContent: ev.label }));
+  });
+
+  // Group headers + row bg
+  groups.forEach(g => {
+    const hy = g.headerY;
+    svg.appendChild(el('rect', { x: CHART_START_X, y: hy + 2, width: CHART_WIDTH + 30, height: GROUP_HEADER_HEIGHT - 4, fill: 'none', stroke: g.color, 'stroke-width': 1, 'stroke-dasharray': '6,3', rx: 4, opacity: 0.4 }));
+    svg.appendChild(el('text', { x: 10, y: hy + GROUP_HEADER_HEIGHT - 9, fill: g.color, 'font-size': 12, 'font-weight': 'bold', textContent: g.name }));
+    g.figures.forEach((f, i) => {
+      const y = yPositions[allFigures.indexOf(f)];
+      if (i % 2 === 0) svg.appendChild(el('rect', { x: CHART_START_X, y, width: CHART_WIDTH + 30, height: ROW_HEIGHT, fill: '#ffffff04' }));
+    });
+  });
+
+  // Name labels
+  allFigures.forEach((f, idx) => {
+    svg.appendChild(el('text', { x: CHART_START_X - 8, y: yPositions[idx] + ROW_HEIGHT / 2 + 4, 'text-anchor': 'end', fill: f.group.color, 'font-size': 13, 'font-weight': '600', textContent: f.name }));
+  });
+
+  // Life span bars
+  const barRects = [];
+  allFigures.forEach((f, idx) => {
+    const y = yPositions[idx];
+    const barX = CHART_START_X + (f.birth - YEAR_MIN) * PX_PER_YEAR;
+    const barW = Math.max(3, (f.death - f.birth) * PX_PER_YEAR);
+    const barH = ROW_HEIGHT - 8, barY = y + 4;
+    svg.appendChild(el('rect', { x: barX, y, width: barW, height: ROW_HEIGHT, fill: f.group.color, opacity: 0.08 }));
+    const rect = el('rect', { x: barX, y: barY, width: barW, height: barH, rx: 3, ry: 3, fill: f.group.color, class: 'bar-rect' });
+    rect._data = f;
+    barRects.push(rect);
+    svg.appendChild(rect);
+    if (barW > 30) svg.appendChild(el('text', { x: barX + barW - 4, y: barY + barH - 5, 'text-anchor': 'end', fill: '#aaa', 'font-size': 9, textContent: f.death }));
+    if (barW > 40) svg.appendChild(el('text', { x: barX + 4, y: barY + 12, 'text-anchor': 'start', fill: '#999', 'font-size': 9, textContent: f.birth }));
+  });
+
+  // ═══════════════════════════════════════════════════════════════
+  // TOOLTIP
+  // ═══════════════════════════════════════════════════════════════
+  const tooltip = document.getElementById('tooltip');
+  function showTooltip(f, ev) {
+    tooltip.innerHTML = `<div class="tname">${f.name} <span class="tyears">${f.birth} — ${f.death}（享年${f.death - f.birth}岁）</span></div><div class="tdetail">${f.role}</div><div class="tdetail" style="color:${f.group.color};margin-top:3px;">${f.group.name} · 点击查看生平</div>`;
+    tooltip.classList.add('show'); moveTooltip(ev);
+  }
+  function moveTooltip(ev) {
+    let tx = ev.clientX + 16, ty = ev.clientY - 10;
+    if (tx + 280 > window.innerWidth) tx = ev.clientX - 290;
+    if (ty + 90 > window.innerHeight) ty = ev.clientY - 100;
+    tooltip.style.left = tx + 'px'; tooltip.style.top = ty + 'px';
+  }
+  function hideTooltip() { tooltip.classList.remove('show'); }
+
+  // ═══════════════════════════════════════════════════════════════
+  // MODAL — click to show portrait + bio + events
+  // ═══════════════════════════════════════════════════════════════
+  const overlay = document.getElementById('modalOverlay');
+  const card = document.getElementById('modalCard');
+
+  function openModal(f) {
+    const eventsHtml = f.events.map(([yr, txt]) =>
+      `<div class="event-item"><span class="event-year">公元 ${yr} 年</span><span class="event-text">${txt}</span></div>`
+    ).join('');
+
+    card.innerHTML = `
+      <button class="modal-close" onclick="document.getElementById('modalOverlay').classList.remove('active')">&times;</button>
+      <div class="modal-header">
+        <div class="portrait-frame">${getPortrait(f)}</div>
+        <div class="modal-title-area">
+          <div class="modal-name" style="color:${f.group.color}">${f.name}</div>
+          <div class="modal-years">公元 ${f.birth} 年 — ${f.death} 年（享年 ${f.death - f.birth} 岁）</div>
+          <div class="modal-role">${f.role}</div>
+          <div class="modal-era-badge" style="background:${f.group.color}22;color:${f.group.color};border:1px solid ${f.group.color}44">${f.group.name}</div>
+        </div>
+      </div>
+      <div class="modal-bio">${f.bio}</div>
+      <div class="modal-events">
+        <h3 style="color:${f.group.color}">主要生平事迹</h3>
+        <div class="event-timeline">${eventsHtml}</div>
+      </div>
+    `;
+    card.scrollTop = 0;
+    overlay.classList.add('active');
+  }
+
+  overlay.addEventListener('click', function(e) {
+    if (e.target === overlay) overlay.classList.remove('active');
+  });
+
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') overlay.classList.remove('active');
+  });
+
+  // ═══════════════════════════════════════════════════════════════
+  // EVENT BINDINGS — with comparison mode support
+  // ═══════════════════════════════════════════════════════════════
+  let selectedFigure = null;
+
+  barRects.forEach(rect => {
+    rect.addEventListener('mouseenter', (ev) => { showTooltip(rect._data, ev); });
+    rect.addEventListener('mousemove', moveTooltip);
+    rect.addEventListener('mouseleave', hideTooltip);
+    rect.addEventListener('click', () => {
+      const f = rect._data;
+      if (selectedFigure && selectedFigure !== f) {
+        openCompare(selectedFigure, f);
+        barRects.forEach(r => r.classList.remove('selected'));
+        highlightRegions(null);
+        selectedFigure = null;
+      } else if (selectedFigure === f) {
+        barRects.forEach(r => r.classList.remove('selected'));
+        highlightRegions(null);
+        selectedFigure = null;
+      } else {
+        barRects.forEach(r => r.classList.remove('selected'));
+        rect.classList.add('selected');
+        selectedFigure = f;
+        highlightRegions(f);
+        openModal(f);
+      }
+    });
+  });
+
+  // Clear selection hint
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+      if (document.getElementById('compareOverlay').classList.contains('active')) {
+        document.getElementById('compareOverlay').classList.remove('active');
+      } else if (overlay.classList.contains('active')) {
+        overlay.classList.remove('active');
+      }
+      barRects.forEach(r => r.classList.remove('selected'));
+      selectedFigure = null;
+      highlightRegions(null);
+    }
+  });
+
+  // ═══════════════════════════════════════════════════════════════
+  // SEARCH & FILTER
+  // ═══════════════════════════════════════════════════════════════
+  const searchInput = document.getElementById('searchInput');
+  const filterTags = document.getElementById('filterTags');
+  const activeGroups = new Set(groups.map(g => g.name));
+
+  // Build filter tags
+  groups.forEach(g => {
+    const tag = document.createElement('span');
+    tag.className = 'filter-tag';
+    tag.textContent = g.name;
+    tag.style.background = g.color + '22';
+    tag.style.color = g.color;
+    tag.style.borderColor = g.color + '44';
+    tag.addEventListener('click', () => {
+      if (activeGroups.has(g.name)) {
+        activeGroups.delete(g.name);
+        tag.classList.add('inactive');
+      } else {
+        activeGroups.add(g.name);
+        tag.classList.remove('inactive');
+      }
+      applyFilter();
+    });
+    filterTags.appendChild(tag);
+  });
+
+  function applyFilter() {
+    const query = searchInput.value.trim().toLowerCase();
+    // Collect all text labels and row backgrounds
+    const allTexts = svg.querySelectorAll('text');
+    barRects.forEach(rect => {
+      const f = rect._data;
+      const visible = (!query || f.name.includes(query)) && activeGroups.has(f.group.name);
+      rect.style.opacity = visible ? '1' : '0.12';
+      rect.style.pointerEvents = visible ? 'auto' : 'none';
+    });
+    // Dim/hide name labels + year labels
+    allTexts.forEach(t => {
+      const content = t.textContent || '';
+      // Find matching figure name
+      const matchFig = allFigures.find(ff => ff.name === content);
+      if (matchFig) {
+        const visible = (!query || matchFig.name.includes(query)) && activeGroups.has(matchFig.group.name);
+        t.style.opacity = visible ? '1' : '0.15';
+      }
+    });
+  }
+
+  searchInput.addEventListener('input', applyFilter);
+
+  // ═══════════════════════════════════════════════════════════════
+  // COMPARISON MODE
+  // ═══════════════════════════════════════════════════════════════
+  const compareOverlay = document.getElementById('compareOverlay');
+  const compareCard = document.getElementById('compareCard');
+
+  function openCompare(f1, f2) {
+    // Highlight combined regions
+    const allRegions = [...new Set([...(figureRegions[f1.name]||[]), ...(figureRegions[f2.name]||[])])];
+    Object.values(regionEls).forEach(({ path, label }) => {
+      path.setAttribute('fill-opacity', '0.13');
+      path.setAttribute('stroke-opacity', '0.28');
+      path.setAttribute('stroke-width', '0.8');
+      path.classList.remove('highlight');
+      path.removeAttribute('filter');
+      label.classList.remove('highlight');
+      label.setAttribute('fill', '#777');
+      label.setAttribute('font-size', '7');
+    });
+    allRegions.forEach(rid => {
+      const els = regionEls[rid];
+      if (els) {
+        els.path.setAttribute('fill-opacity', '0.45');
+        els.path.setAttribute('stroke-opacity', '0.85');
+        els.path.setAttribute('stroke-width', '2');
+        els.path.setAttribute('stroke', '#f9a825');
+        els.path.setAttribute('filter', 'url(#regionGlow)');
+        els.path.classList.add('highlight');
+        els.label.classList.add('highlight');
+        els.label.setAttribute('fill', '#fff');
+        els.label.setAttribute('font-size', '8');
+      }
+    });
+    const regionNames = allRegions.map(rid => {
+      const def = regionDefs.find(d => d.id === rid);
+      return def ? def.name : rid;
+    }).join(' · ');
+    miniMapFig.textContent = `${f1.name} vs ${f2.name} · ${regionNames || '未知'}`;
+    miniMapFig.style.color = '#f9a825';
+    miniMapFig.classList.add('active');
+
+    const overlapStart = Math.max(f1.birth, f2.birth);
+    const overlapEnd = Math.min(f1.death, f2.death);
+    const hasOverlap = overlapStart <= overlapEnd;
+
+    function colHTML(f) {
+      const eventsHtml = f.events.map(([yr, txt]) =>
+        `<div class="compare-event-item"><span class="compare-event-year">公元 ${yr} 年</span><span class="compare-event-text">${txt}</span></div>`
+      ).join('');
+      return `
+        <div class="compare-col">
+          <div class="compare-col-header">
+            <div class="compare-portrait">${getPortrait(f)}</div>
+            <div class="cname" style="color:${f.group.color}">${f.name}</div>
+            <div class="cyears">公元 ${f.birth} 年 — ${f.death} 年（享年 ${f.death - f.birth} 岁）</div>
+            <div class="crole">${f.role}</div>
+            <div style="margin-top:4px;font-size:11px;color:${f.group.color};opacity:0.7">${f.group.name}</div>
+            ${hasOverlap ? `<div class="overlap-badge">两人交叉 ${overlapStart} — ${overlapEnd} 年（${overlapEnd - overlapStart} 年）</div>` : ''}
+          </div>
+          <div class="compare-bio">${f.bio}</div>
+          <div class="compare-events">
+            <h4 style="color:${f.group.color}">主要生平事迹</h4>
+            ${eventsHtml}
+          </div>
+        </div>
+      `;
+    }
+
+    compareCard.innerHTML = `
+      <button class="compare-close" onclick="document.getElementById('compareOverlay').classList.remove('active');highlightRegions(null)">&times;</button>
+      <div class="compare-cols">
+        ${colHTML(f1)}
+        <div class="compare-divider"></div>
+        ${colHTML(f2)}
+      </div>
+      <div class="compare-hint">💡 按 <span>Esc</span> 关闭 · 点击单个色条查看单人详情</div>
+    `;
+    compareCard.scrollTop = 0;
+    compareOverlay.classList.add('active');
+  }
+
+  compareOverlay.addEventListener('click', function(e) {
+    if (e.target === compareOverlay) {
+      compareOverlay.classList.remove('active');
+      highlightRegions(null);
+    }
+  });
+
+  // ═══════════════════════════════════════════════════════════════
+  // MINI MAP — region highlighting
+  // ═══════════════════════════════════════════════════════════════
+  const regionDefs = [
+    { id: "saibei",    name: "塞北", color: "#a08060", labelX: 130, labelY: 30,
+      path: "M15,8 L70,5 L150,4 L230,7 L248,20 L240,42 L210,52 L160,55 L100,52 L50,48 L25,37 L15,20 Z" },
+    { id: "hexi",      name: "河西", color: "#b09070", labelX: 35, labelY: 62,
+      path: "M12,38 L40,35 L58,52 L55,75 L42,88 L28,82 L15,65 L12,38 Z" },
+    { id: "hebei",     name: "河北", color: "#6080a0", labelX: 170, labelY: 48,
+      path: "M95,38 L150,32 L210,28 L238,38 L245,50 L235,62 L210,60 L180,62 L150,65 L125,68 L105,60 L95,38 Z" },
+    { id: "guanzhong", name: "关中", color: "#e8a030", labelX: 78, labelY: 68,
+      path: "M55,50 L68,48 L85,55 L105,62 L115,72 L108,82 L92,88 L72,85 L52,78 L45,65 L55,50 Z" },
+    { id: "zhongyuan", name: "中原", color: "#d04030", labelX: 142, labelY: 78,
+      path: "M108,62 L130,58 L155,62 L172,68 L178,80 L168,92 L148,98 L128,100 L110,95 L102,82 L108,62 Z" },
+    { id: "bashu",     name: "巴蜀", color: "#4a9040", labelX: 62, labelY: 115,
+      path: "M42,90 L58,85 L72,92 L85,102 L90,118 L85,135 L72,142 L55,140 L40,132 L32,118 L35,102 L42,90 Z" },
+    { id: "jingzhou",  name: "荆州", color: "#3080c0", labelX: 130, labelY: 130,
+      path: "M105,105 L125,98 L148,105 L162,115 L165,132 L158,148 L142,158 L122,160 L105,155 L95,142 L98,125 L105,105 Z" },
+    { id: "jiangdong", name: "江东", color: "#208070", labelX: 200, labelY: 105,
+      path: "M168,72 L190,68 L215,72 L235,80 L242,95 L235,112 L222,125 L205,138 L188,142 L172,138 L162,128 L158,112 L162,98 L168,72 Z" },
+    { id: "lingnan",   name: "岭南", color: "#8040a0", labelX: 148, labelY: 172,
+      path: "M115,150 L138,142 L162,148 L182,152 L192,165 L185,182 L168,192 L145,198 L122,195 L105,185 L100,170 L108,158 L115,150 Z" },
+  ];
+
+  const miniMapSvg = document.getElementById('miniMap');
+  const miniMapFig = document.getElementById('miniMapFig');
+  const regionEls = {};
+
+  function buildMiniMap() {
+    while (miniMapSvg.firstChild) miniMapSvg.removeChild(miniMapSvg.firstChild);
+
+    // Defs: glow filter
+    const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
+    const glow = document.createElementNS('http://www.w3.org/2000/svg', 'filter');
+    glow.setAttribute('id', 'regionGlow');
+    glow.setAttribute('x', '-25%'); glow.setAttribute('y', '-25%');
+    glow.setAttribute('width', '150%'); glow.setAttribute('height', '150%');
+    glow.innerHTML = '<feGaussianBlur in="SourceGraphic" stdDeviation="3" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>';
+    defs.appendChild(glow);
+    miniMapSvg.appendChild(defs);
+
+    // Background
+    const bg = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+    bg.setAttribute('x', 0); bg.setAttribute('y', 0);
+    bg.setAttribute('width', 260); bg.setAttribute('height', 210);
+    bg.setAttribute('fill', '#0a0a18'); bg.setAttribute('rx', 4);
+    miniMapSvg.appendChild(bg);
+
+    // China outline
+    const outline = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    outline.setAttribute('d', 'M18,8 L68,4 L148,3 L228,7 L248,18 L253,35 L248,52 L238,68 L228,82 L218,98 L208,112 L198,125 L185,140 L170,155 L152,168 L135,178 L115,185 L95,190 L72,193 L48,188 L28,178 L16,162 L10,142 L8,118 L10,95 L12,72 L18,50 L18,30 Z');
+    outline.setAttribute('fill', '#0d0d20');
+    outline.setAttribute('stroke', '#1e1e3a');
+    outline.setAttribute('stroke-width', '1');
+    outline.setAttribute('stroke-dasharray', '3,5');
+    outline.setAttribute('opacity', '0.7');
+    miniMapSvg.appendChild(outline);
+
+    // Region paths
+    regionDefs.forEach(r => {
+      const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      path.setAttribute('d', r.path);
+      path.setAttribute('fill', r.color);
+      path.setAttribute('fill-opacity', '0.13');
+      path.setAttribute('stroke', r.color);
+      path.setAttribute('stroke-width', '0.8');
+      path.setAttribute('stroke-opacity', '0.28');
+      path.setAttribute('class', 'map-region');
+      path.setAttribute('data-region', r.id);
+      miniMapSvg.appendChild(path);
+
+      const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+      label.setAttribute('x', r.labelX);
+      label.setAttribute('y', r.labelY + 1);
+      label.setAttribute('class', 'map-label');
+      label.setAttribute('data-region', r.id);
+      label.setAttribute('text-anchor', 'middle');
+      label.textContent = r.name;
+      miniMapSvg.appendChild(label);
+
+      regionEls[r.id] = { path, label };
+    });
+
+    // Yellow River
+    const yr = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    yr.setAttribute('d', 'M22,68 Q55,45 68,50 Q78,55 72,70 Q85,75 110,72 Q135,68 155,70 Q175,63 200,58 Q225,50 238,45');
+    yr.setAttribute('fill', 'none');
+    yr.setAttribute('stroke', '#8a7020');
+    yr.setAttribute('stroke-width', '1.4');
+    yr.setAttribute('stroke-opacity', '0.45');
+    yr.setAttribute('stroke-linecap', 'round');
+    miniMapSvg.appendChild(yr);
+    const yrLbl = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+    yrLbl.setAttribute('x', 23); yrLbl.setAttribute('y', 64);
+    yrLbl.setAttribute('fill', '#6a5018'); yrLbl.setAttribute('font-size', '7');
+    yrLbl.textContent = '黄河';
+    miniMapSvg.appendChild(yrLbl);
+
+    // Yangtze River
+    const yz = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    yz.setAttribute('d', 'M18,115 Q45,122 58,128 Q78,132 95,132 Q125,135 150,130 Q175,122 200,116 Q225,110 248,105');
+    yz.setAttribute('fill', 'none');
+    yz.setAttribute('stroke', '#3a5a3a');
+    yz.setAttribute('stroke-width', '1.4');
+    yz.setAttribute('stroke-opacity', '0.45');
+    yz.setAttribute('stroke-linecap', 'round');
+    miniMapSvg.appendChild(yz);
+    const yzLbl = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+    yzLbl.setAttribute('x', 19); yzLbl.setAttribute('y', 112);
+    yzLbl.setAttribute('fill', '#3a4a3a'); yzLbl.setAttribute('font-size', '7');
+    yzLbl.textContent = '长江';
+    miniMapSvg.appendChild(yzLbl);
+
+    // Major cities
+    [{ name: '洛阳', x: 138, y: 80 }, { name: '长安', x: 72, y: 78 },
+     { name: '建康', x: 208, y: 115 }, { name: '成都', x: 55, y: 128 }].forEach(c => {
+      const dot = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+      dot.setAttribute('cx', c.x); dot.setAttribute('cy', c.y); dot.setAttribute('r', 2);
+      dot.setAttribute('fill', '#fff'); dot.setAttribute('opacity', '0.4');
+      miniMapSvg.appendChild(dot);
+      const cl = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+      cl.setAttribute('x', c.x + 4); cl.setAttribute('y', c.y + 3);
+      cl.setAttribute('fill', '#444'); cl.setAttribute('font-size', '6.5');
+      cl.textContent = c.name;
+      miniMapSvg.appendChild(cl);
+    });
+
+    // North arrow
+    const arrow = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+    arrow.setAttribute('x', 248); arrow.setAttribute('y', 14);
+    arrow.setAttribute('text-anchor', 'end'); arrow.setAttribute('fill', '#3a3a3a');
+    arrow.setAttribute('font-size', '10');
+    arrow.textContent = 'N↑';
+    miniMapSvg.appendChild(arrow);
+  }
+
+  function highlightRegions(figure) {
+    Object.values(regionEls).forEach(({ path, label }) => {
+      path.setAttribute('fill-opacity', '0.13');
+      path.setAttribute('stroke-opacity', '0.28');
+      path.setAttribute('stroke-width', '0.8');
+      path.classList.remove('highlight');
+      path.removeAttribute('filter');
+      label.classList.remove('highlight');
+      label.setAttribute('fill', '#777');
+      label.setAttribute('font-size', '7');
+    });
+
+    if (!figure) {
+      miniMapFig.textContent = '点击人物查看区域';
+      miniMapFig.classList.remove('active');
+      return;
+    }
+
+    const regions = figureRegions[figure.name] || [];
+    regions.forEach(rid => {
+      const els = regionEls[rid];
+      if (els) {
+        els.path.setAttribute('fill-opacity', '0.45');
+        els.path.setAttribute('stroke-opacity', '0.85');
+        els.path.setAttribute('stroke-width', '2');
+        els.path.setAttribute('stroke', figure.group.color);
+        els.path.setAttribute('filter', 'url(#regionGlow)');
+        els.path.classList.add('highlight');
+        els.label.classList.add('highlight');
+        els.label.setAttribute('fill', '#fff');
+        els.label.setAttribute('font-size', '8');
+      }
+    });
+
+    const regionNames = regions.map(rid => {
+      const def = regionDefs.find(d => d.id === rid);
+      return def ? def.name : rid;
+    }).join(' · ');
+    miniMapFig.textContent = `${figure.name} · ${regionNames || '未知'}`;
+    miniMapFig.style.color = figure.group.color;
+    miniMapFig.classList.add('active');
+  }
+
+  window.highlightRegions = highlightRegions;
+  buildMiniMap();
+
+  // ═══════════════════════════════════════════════════════════════
+  // LEGEND — click to scroll to group; ctrl+click to filter
+  // ═══════════════════════════════════════════════════════════════
+  const legend = document.getElementById('legend');
+  const chartWrapper = document.getElementById('chartWrapper');
+  let legendTags = [];
+  groups.forEach(g => {
+    const item = document.createElement('span');
+    item.className = 'legend-item';
+    item.innerHTML = `<span class="legend-dot" style="background:${g.color}"></span>${g.name}`;
+    item.addEventListener('click', (e) => {
+      if (e.ctrlKey || e.metaKey) {
+        // Toggle filter
+        if (activeGroups.has(g.name)) {
+          activeGroups.delete(g.name);
+        } else {
+          activeGroups.add(g.name);
+        }
+        // Sync filter tags
+        const tag = filterTags.children[groups.indexOf(g)];
+        if (tag) tag.classList.toggle('inactive', !activeGroups.has(g.name));
+        applyFilter();
+      } else {
+        chartWrapper.scrollTo({ top: g.headerY + GROUP_HEADER_HEIGHT, behavior: 'smooth' });
+      }
+    });
+    legend.appendChild(item);
+    legendTags.push(item);
+  });
+
+  // Initial scroll position
+  chartWrapper.scrollLeft = Math.max(0, CHART_START_X + (190 - YEAR_MIN) * PX_PER_YEAR - 200);
+
+  console.log('✅ 魏晋南北朝人物对比图 v3 已就绪');
+  console.log(`   ${allFigures.length} 位人物 | Canvas古风漫画画像 | 搜索筛选 | 双人对比模式 | Ctrl+图例筛选`);
+})();
+</script>
+</body>
+</html>
