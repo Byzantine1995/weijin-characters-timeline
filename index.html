@@ -8,7 +8,7 @@
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   body {
     font-family: "Microsoft YaHei", "PingFang SC", "Noto Sans SC", sans-serif;
-    background: #1a1a2e; color: #e0e0e0; min-height: 100vh;
+    background: rgba(16,16,28,0.45); color: #e0e0e0; min-height: 100vh;
     overflow-x: hidden;
     position: relative;
   }
@@ -16,7 +16,7 @@
     content: '';
     position: fixed; inset: 0; z-index: 0;
     background: url("luoshen-bg.jpg") no-repeat center bottom / cover;
-    opacity: 0.18;
+    opacity: 0.28;
     pointer-events: none;
   }
   .container {
@@ -41,7 +41,7 @@
 
   .chart-wrapper {
     position: relative; overflow: auto; border: 1px solid #333;
-    border-radius: 8px; background: #12121f;
+    border-radius: 8px; background: rgba(18,18,31,0.55);
     max-height: 72vh; max-width: 100%;
   }
   .chart-wrapper::-webkit-scrollbar { width: 8px; height: 8px; }
@@ -57,7 +57,7 @@
 
   .tooltip {
     position: fixed; pointer-events: none; opacity: 0;
-    background: rgba(20,20,40,0.95); border: 1px solid #555;
+    background: rgba(20,20,40,0.88); border: 1px solid #555;
     border-radius: 6px; padding: 10px 14px; font-size: 13px;
     line-height: 1.7; z-index: 100; white-space: nowrap;
     transition: opacity 0.12s; box-shadow: 0 4px 16px rgba(0,0,0,0.5);
@@ -162,7 +162,7 @@
   /* ── MINI MAP ── */
   .mini-map-panel {
     position: fixed; top: 16px; right: 16px;
-    width: 300px; background: rgba(18,18,31,0.92);
+    width: 300px; background: rgba(18,18,31,0.72);
     border: 1px solid #333; border-radius: 10px;
     padding: 10px 12px; z-index: 50;
     backdrop-filter: blur(6px);
@@ -194,7 +194,7 @@
   .search-bar input {
     width: 100%; max-width: 360px; padding: 8px 14px;
     border-radius: 20px; border: 1px solid #444; outline: none;
-    background: #12121f; color: #ddd; font-size: 14px;
+    background: rgba(18,18,31,0.55); color: #ddd; font-size: 14px;
     transition: border-color 0.2s;
   }
   .search-bar input:focus { border-color: #f9a825; }
@@ -1195,7 +1195,7 @@
     return e;
   }
 
-  svg.appendChild(el('rect', { x: 0, y: 0, width: SVG_WIDTH, height: SVG_HEIGHT, fill: '#12121f' }));
+  svg.appendChild(el('rect', { x: 0, y: 0, width: SVG_WIDTH, height: SVG_HEIGHT, fill: 'rgba(18,18,31,0.65)' }));
 
   // Era bands
   [{ label: '东汉末', start: 184, end: 220, color: '#888' },
